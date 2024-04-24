@@ -22,7 +22,7 @@ import DrawerContent from './drawerContent';
         backgroundColor: 'pink'
         }}}>
 
-        <Drawer.Screen name="Settings" component={NavigationPage} />
+        <Drawer.Screen name="NavigationPage" component={NavigationPage} />
 
       </Drawer.Navigator>
     );

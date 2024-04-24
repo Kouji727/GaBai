@@ -61,7 +61,7 @@ const DrawerItems = props => {
 
           <View activeOpacity={0.8}>
             <View style={styles.userInfoSection}>
-                <View style={{marginVertical: 15}}>
+                <View style={{marginVertical: 15, alignItems: 'center'}}>
                     <Avatar.Image
                     source={{
                         uri: imgUri, //PFP PICTUE HERE
@@ -70,11 +70,11 @@ const DrawerItems = props => {
                     style={{marginTop: 5}}
                     />
                     
-                    <View style={{flexDirection: 'column'}}>
-                    <Title style={styles.title}>{auth.currentUser?.email}</Title>
-                    <Text style={styles.caption} numberOfLines={1}>
-                    {auth.currentUser?.email}
-                    </Text>
+                    <View style={{flexDirection: 'column', }}>
+                      <Title style={styles.title}>{auth.currentUser?.uid}</Title>
+                      <Text style={styles.caption} numberOfLines={1}>
+                      {auth.currentUser?.email}
+                      </Text>
                     </View>
               </View>
             </View>
