@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, FlatList, Alert } from 'react-native';
 
 import CreateMessage from '../components/createMessage';
 import ContentItem from '../components/contentItem';
+import PostDesign from '../components/postDesign';
 
 export default function Community() {
 
@@ -47,14 +48,8 @@ export default function Community() {
                 <View style={styles.content}>
                     <CreateMessage submitMsg={submitMsg}/>
 
-                        <View style={styles.list}>
-                            <FlatList showsVerticalScrollIndicator={false}
-                                data={content}
-                                renderItem={({ item }) => (
-                                    <ContentItem item={item} deleteCont={deleteCont}/>
-                                )}
-                                />
-                        </View>
+                            <PostDesign/>
+
                 </View>
 
             </View>
@@ -70,7 +65,6 @@ const styles = StyleSheet.create({
 
     content: {
         flex: 1,
-        padding: 40,
         paddingTop: -20,
     },
 
