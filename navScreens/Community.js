@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, FlatList, Alert } from 'react-native';
+import { db } from '../firebase';
 
 import CreateMessage from '../components/createMessage';
 import ContentItem from '../components/contentItem';
@@ -35,6 +36,31 @@ export default function Community() {
 
     }
 
+    const PostType = {
+        id: String,
+        name: String,
+        createdAt: Date,
+        completedAt: Date
+    };
+
+    const [ posts, setPosts ] = useState();
+
+    useEffect( () => {
+        const unsubscribe = db.collection('posts')
+        .onSnapshot(snapshot => {
+            const postsData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                username: doc.data().username,
+                title: doc.data().title,
+                date: doc.data().date.toDate().toLocaleString()
+            }));
+            setPosts(postsData);
+        });
+
+        return () => unsubscribe();
+    }, [])
+
+
     return (
 
             <View style={styles.container}>
@@ -46,9 +72,16 @@ export default function Community() {
                     </View>
 
                 <View style={styles.content}>
-                    <CreateMessage submitMsg={submitMsg}/>
 
-                            <PostDesign/>
+
+                    {
+                        posts?.map(post => 
+                        <PostDesign 
+                            username={post.username} 
+                            title={post.title} 
+                            date={post.date}
+                        />)
+                    }
 
                 </View>
 
@@ -61,6 +94,7 @@ export default function Community() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#F3E8EB'
     },
 
     content: {
