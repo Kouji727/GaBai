@@ -36,12 +36,7 @@ export default function Community() {
 
     }
 
-    const PostType = {
-        id: String,
-        name: String,
-        createdAt: Date,
-        completedAt: Date
-    };
+
 
     const [ posts, setPosts ] = useState();
 
@@ -77,6 +72,7 @@ export default function Community() {
                     {
                         posts?.map(post => 
                         <PostDesign 
+                            key={post.id}
                             username={post.username} 
                             title={post.title} 
                             date={post.date}
