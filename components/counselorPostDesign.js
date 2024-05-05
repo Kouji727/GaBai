@@ -2,14 +2,22 @@ import React from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
 import { Octicons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { useState } from 'react';
 
-const PostDesign = ({username, title, date}) => {
+const CounselorPostDesign = ({item}) => {
+
+    const [isLiked, setIsLiked] = useState(false);
+
+    const toggleLike = () => {
+        setIsLiked(!isLiked);
+    };
+
 return (
 
 
         <View style={styles.allCont}>
 
-            <View style={{        margin: 5}}>
+            <View style={{margin: 5}}>
                 <View style={styles.profileName}>
                     
                         <View style={styles.topItems}>
@@ -29,14 +37,14 @@ return (
 
                             <View style={styles.name}>
                                 <Text style={{fontWeight: 'bold', fontSize: 12}}>
-                                    {username}
+                                    {item.username}
                                 </Text>
                                 
                             </View>
 
                             <View style={styles.datePosted}>
                                 <Text style={{color: 'grey', fontSize: 12}}>
-                                    {date}
+                                    {item.date}
                                 </Text>
                                 
                             </View>
@@ -56,7 +64,7 @@ return (
 
                 <View style={styles.postTitle}>
                     <Text style={{fontWeight: 'bold', fontSize: 18}}>
-                        {title}
+                        {item.title}
                     </Text>
 
                 </View>
@@ -64,22 +72,22 @@ return (
                 <View style={styles.postPic}>
                         <TouchableOpacity style={styles.imageContainer}>
                             <Image
-                            source={require('../assets/kou.jpg')}
+                            source={require('../assets/bg.jpg')}
                             style={styles.image}
                             />
                         </TouchableOpacity>
                 </View>
                 
                 <View style={styles.lowerButtonCont}> 
-                    <TouchableOpacity style={styles.icontainer}>
-                        <FontAwesome6 name="heart" size={24} color="red" solid/>
-                        <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}>10</Text>
+                    <TouchableOpacity style={styles.icontainer} onPress={toggleLike}>
+                        <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
+                        <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}></Text>
                         
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.icontainer}>
                         <FontAwesome6 name="comment-alt" size={24} color="grey"/>
-                        <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}>5</Text>
+                        <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}></Text>
 
                     </TouchableOpacity>
                 </View>
@@ -88,10 +96,10 @@ return (
 
         </View>
 
-  )
+    )
 }
 
-export default PostDesign
+export default CounselorPostDesign
 
 
 const styles = StyleSheet.create({

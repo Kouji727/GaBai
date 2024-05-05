@@ -18,4 +18,20 @@ const firebaseApp = firebase.initializeApp(firebaseConfig);
 const db = firebaseApp.firestore();
 const auth = firebase.auth();
 
+export const getPosts = () => {
+    return db.collection('posts')
+        .get()
+        .then(result => result.docs)
+        .then(docs => docs.map(doc => ({
+            id: doc.id,
+            username: doc.data().username,
+            title: doc.data().title,
+            date: doc.data().date.toDate().toLocaleString()
+        })))
+    }
+
+export const streamPosts = (observer) => {
+    db.collection('posts').onSnapshot(observer)
+}
+
 export { auth, db };

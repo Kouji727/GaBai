@@ -3,11 +3,11 @@ import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import Settings from '../screens/settings';
-import NavigationPage from './navigation';
+import NavigationPage from './NavigationPage';
 import DrawerContent from './drawerContent';
   const Drawer = createDrawerNavigator();
   
-  function Profile() {
+  function MainScreen() {
     return (
 
       <Drawer.Navigator
@@ -28,4 +28,4 @@ import DrawerContent from './drawerContent';
     );
   }
 
-  export default Profile
+  export default MainScreen

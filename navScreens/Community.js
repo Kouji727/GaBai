@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Alert } from 'react-native';
-import { db } from '../firebase';
+import { StyleSheet, Text, View, FlatList, Alert, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import {db, streamPosts } from '../firebase';
+import { FontAwesome } from '@expo/vector-icons';
 
 import CreateMessage from '../components/createMessage';
 import ContentItem from '../components/contentItem';
-import PostDesign from '../components/postDesign';
+import CounselorPostDesign from '../components/counselorPostDesign';
+import UserPostDesign from '../components/userPostDesign';
+
+import {useNavigation} from '@react-navigation/native';
+import { MenuProvider } from 'react-native-popup-menu';
 
 export default function Community() {
+
+    const navigation = useNavigation();
 
     const [content, setContent] = useState([
         { text: 'this is a test ', key: '1'},
@@ -36,52 +43,86 @@ export default function Community() {
 
     }
 
+    const [posts, setPosts] = useState();
 
-
-    const [ posts, setPosts ] = useState();
+    const mapDocToPost = (document) => {
+        return {
+            id: document.id,
+            username: document.data().username,
+            title: document.data().title,
+            date: document.data().date.toDate().toLocaleString()
+        }
+    }
 
     useEffect( () => {
-        const unsubscribe = db.collection('posts')
-        .onSnapshot(snapshot => {
-            const postsData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                username: doc.data().username,
-                title: doc.data().title,
-                date: doc.data().date.toDate().toLocaleString()
-            }));
-            setPosts(postsData);
+        const unsubscribe = streamPosts({
+            next: querySnapshot => {
+                const posts = querySnapshot
+                .docs.map(docSnapshot => mapDocToPost(docSnapshot))
+                setPosts(posts)
+            },
+            error: (error) => console.log(error)
         });
 
-        return () => unsubscribe();
-    }, [])
+        return unsubscribe
+    }, [setPosts])
+
+            /*
+            useEffect( () => {
+                const unsubscribe = db.collection('posts')
+                .onSnapshot(snapshot => {
+                    const postsData = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        username: doc.data().username,
+                        title: doc.data().title,
+                        date: doc.data().date.toDate().toLocaleString()
+                    }));
+                    setPosts(postsData);
+                });
+
+                return () => unsubscribe();
+            }, [])
+
+            */
+
+
+
+    
 
 
     return (
-
-            <View style={styles.container}>
+        <MenuProvider>
+            <ScrollView
+            style={styles.container}
+            showsVerticalScrollIndicator = {false}>
                     <View style={styles.fSpace}>
                         <Text style={styles.fSpaceText}>
                             Freedom Space
                         </Text>
+
+                        <TouchableWithoutFeedback onPress={() => navigation.navigate("CreatePost")}>
+                            <FontAwesome name="plus-square-o" size={24} color="black" />
+                        </TouchableWithoutFeedback>
 
                     </View>
 
                 <View style={styles.content}>
 
 
+                    {/* {
+                        posts?.map(post => <CounselorPostDesign key={post.id} item={post} />)
+                    } */}
+
                     {
-                        posts?.map(post => 
-                        <PostDesign 
-                            key={post.id}
-                            username={post.username} 
-                            title={post.title} 
-                            date={post.date}
-                        />)
+                        posts?.map(post => <UserPostDesign key={post.id} item={post} />)
                     }
 
                 </View>
 
-            </View>
+            </ScrollView>
+
+        </MenuProvider>
+
 
     )
 

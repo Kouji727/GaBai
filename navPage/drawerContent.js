@@ -13,8 +13,7 @@ function DrawerContent(props) {
     const navigation = useNavigation();
 
 const DrawerList = [
-  {icon: 'home', label: 'Home', navigateTo: 'Schedule'},
-  {icon: 'settings', label: 'Settings', navigateTo: 'Schedule'},
+  {icon: 'settings', label: 'Settings', navigateTo: 'Settings'},
 ];
 const DrawerLayout = ({icon, label, navigateTo}) => {
 

@@ -3,9 +3,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import LoginPage from '../screens/login';
-import NavigationPage from './navigation';
-import Profile from './profile';
+import NavigationPage from './NavigationPage';
+import MainScreen from './mainscreen';
 import Schedule from '../navScreens/Schedule';
+import CreatePost from '../documents/CreatePost';
+import Settings from '../navScreens/Settings';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,9 +19,10 @@ const SignIn = () => {
         headerShown: false,
         headerTitleAlign: 'center'}}>
         <Stack.Screen options={{headerShown: false}} name="Login" component={LoginPage} />
-        <Stack.Screen name="Profile" component={Profile} />
-        <Stack.Screen name="Schedule" component={Schedule} 
+        <Stack.Screen name="MainScreen" component={MainScreen} />
+        <Stack.Screen name="Settings" component={Settings} 
         options={screenOptions={headerShown: true}}/>
+        <Stack.Screen name="CreatePost" component={CreatePost} />
       </Stack.Navigator>
     </NavigationContainer>
   );
