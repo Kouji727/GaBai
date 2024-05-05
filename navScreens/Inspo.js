@@ -11,17 +11,6 @@ export default function Inspo() {
 
     return (
         <View style={styles.container}>
-{/* 
-        <View style={styles.inspoInfo}>
-            <Text style={styles.textInspoInfo}>
-                INSPO
-            </Text>
-
-            <Text>
-                page description
-            </Text>
-
-        </View> */}
 
             <View style={styles.quoteContainer}>
                 <Text style={styles.qotdText}>
@@ -68,19 +57,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F3E8EB'
-        //backgroundColor: 'yellow'
     },
-
-    inspoInfo: {
-        flex:1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-
-    textInspoInfo: {
-        fontSize: 25
-    },
-
+    
     qotdText: {
         fontSize: 25,
         color: 'black',
@@ -89,14 +67,14 @@ const styles = StyleSheet.create({
     },
 
     quoteContainer: {
-        flex: 2,
+        flex: 1,
         backgroundColor: 'white',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
 
     weCont: {
-        flex: 3,
+        flex: 2,
         //backgroundColor: 'red',
         alignItems: 'center',
     },
@@ -129,7 +107,7 @@ const styles = StyleSheet.create({
 
     wfaCont: {
 
-        width: '80%',
+        width: '85%',
         height: '30%',
         backgroundColor: 'white',
         marginTop: 15,
@@ -140,7 +118,7 @@ const styles = StyleSheet.create({
     },
 
     reCont: {
-        width: '80%',
+        width: '85%',
         height: '30%',
         backgroundColor: 'white',
         marginTop: 15,

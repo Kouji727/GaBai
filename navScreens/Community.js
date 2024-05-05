@@ -1,50 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Alert, ScrollView, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, TouchableWithoutFeedback, ActivityIndicator, Modal } from 'react-native';
 import {db, streamPosts } from '../firebase';
 import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 import CreateMessage from '../components/createMessage';
 import ContentItem from '../components/contentItem';
 import CounselorPostDesign from '../components/counselorPostDesign';
 import UserPostDesign from '../components/userPostDesign';
+import EditPost from '../components/editPost';
 
 import {useNavigation} from '@react-navigation/native';
 import { MenuProvider } from 'react-native-popup-menu';
+import CreatePost from '../documents/CreatePost';
 
 export default function Community() {
 
     const navigation = useNavigation();
 
-    const [content, setContent] = useState([
-        { text: 'this is a test ', key: '1'},
-        { text: 'this is another test', key: '2'}
-    ]);
-
-    const deleteCont = (key) => {
-        setContent((oldCont) => {
-            return oldCont.filter(content => content.key != key)
-        })
-    }
-
-    const submitMsg = (msg) => {
-        if(msg.length > 0){
-            setContent((oldCont) => {
-                return [
-                    { text: msg, key: Math.random().toString()},
-                    ...oldCont
-                ];
-            });
-            
-        }else{
-            Alert.alert('', 'Message should not be Blank!', [
-                {text: 'Got it'}
-            ])
-        }
-
-    }
-
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState();
+    const [modalVisible, setModalVisible] = useState(false);
 
     const mapDocToPost = (document) => {
         return {
@@ -72,17 +48,24 @@ export default function Community() {
         return unsubscribe
     }, [setPosts])
 
+
+
+    const toggleModal = () => {
+        setModalVisible(!modalVisible);
+    };
+
     return (
         <MenuProvider>
             <ScrollView
             style={styles.container}
             showsVerticalScrollIndicator = {false}>
+
                     <View style={styles.fSpace}>
                         <Text style={styles.fSpaceText}>
                             Freedom Space
                         </Text>
 
-                        <TouchableWithoutFeedback onPress={() => navigation.navigate("CreatePost")}>
+                        <TouchableWithoutFeedback onPress={toggleModal}>
                             <FontAwesome name="plus-square-o" size={24} color="black" />
                         </TouchableWithoutFeedback>
 
@@ -100,6 +83,17 @@ export default function Community() {
                     )}
                 </View>
 
+                <Modal
+                    transparent={true}
+                    visible={modalVisible}
+                    animationType="slide"
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalContainer}>
+                        <CreatePost cancel={toggleModal} closeAfter={() => setModalVisible(false)}/>
+                    </View>
+                </Modal>
+
             </ScrollView>
 
         </MenuProvider>
@@ -110,6 +104,7 @@ export default function Community() {
 }
 
 const styles = StyleSheet.create({
+
     container: {
         flex: 1,
         backgroundColor: '#F3E8EB'
@@ -143,5 +138,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 })

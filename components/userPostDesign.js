@@ -1,26 +1,27 @@
 import React from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal } from 'react-native'
 import { Octicons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
 import { db } from '../firebase';
+import EditPost from './editPost';
+import { Ionicons } from '@expo/vector-icons';
 
-const UserPostDesign = ({item}) => {
+const UserPostDesign = ({ item }) => {
+
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const toggleModal = () => {
+        setModalVisible(!modalVisible);
+    };
+
+    const submit = () => {
+        toggleModal()
+    }
 
     const editOption = () => {
-        Alert.alert(
-            'Edit Post?',
-            'Are you sure you want to proceed?',
-            [
-                {
-                    text: 'No',
-                    style: 'cancel',
-                },
-                { text: 'Yes', onPress: () => console.log('Pressed Yes') },
-            ],
-            { cancelable: true }
-        );
+        toggleModal();
     };
 
     
@@ -56,6 +57,17 @@ const UserPostDesign = ({item}) => {
 
 return (
         <View style={styles.allCont}>
+
+            <Modal
+                transparent={true}
+                visible={modalVisible}
+                animationType="slide"
+                onRequestClose={() => {}}>
+                    <View style={styles.modalContainer}>
+                        <EditPost item={item} onPress={toggleModal} submit={() => setModalVisible(false)}/>
+                    </View>
+
+            </Modal>
 
             <View style={{margin: 5}}>
                 <View style={styles.profileName}>
@@ -146,6 +158,40 @@ export default UserPostDesign
 
 
 const styles = StyleSheet.create({
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    
+    modalRemoveButton: {
+        width: '15%',
+        aspectRatio: 1, // To make it a square
+        backgroundColor: '#F3E8EB',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 100, // To make it a circle
+        marginTop: 10
+    },
+
+    modalEditButton: {
+        width: '25%',
+        height: 35,
+        backgroundColor: '#F3E8EB',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 25,
+        marginTop: 10,
+    },
+
+    twoButtonsBelow: {
+        width: '95%',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        backgroundColor: 'red'
+    },
 
     allCont: {
         alignSelf: 'center',
