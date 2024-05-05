@@ -25,16 +25,6 @@ const LoginPage = () => {
     return unsubscribe
   }, [])
 
-  const handleSignIn = () => {
-    auth
-    .createUserWithEmailAndPassword(email, password)
-    .then(userCredentials => {
-      const user = userCredentials.user;
-      console.log('Registered with: ', user.email);
-    })
-    .catch(error => alert(error.message))
-  }
-
   const handleLogin = () => {
     auth.signInWithEmailAndPassword(email, password)
     .then(userCredentials => {
@@ -43,10 +33,7 @@ const LoginPage = () => {
     })
     .catch(error => alert("Account doesn't exist!\nCheck if your Email and Password are correct."))
   }
-
   
-  // start
-
   return (
 
     <KeyboardAvoidingView 

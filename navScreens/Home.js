@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Image, FlatList, TouchableWithoutFeedback, TouchableOpacity, Modal, TouchableOpacityBase } from 'react-native';
-import { auth } from '../firebase';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import CounselorCont from '../components/counselorCont';
 import CounselorIcons from '../components/counselorIcons';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,9 +35,6 @@ const Home = () => {
             </Modal>
 
             <View style={styles.conCont}>
-                <View>
-                    <Text>Welcome! {auth.currentUser?.email}</Text>
-                </View>
 
                 <View style={styles.tempCon}>
                     <Text>Ga-Bai</Text>

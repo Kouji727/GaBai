@@ -1,23 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {View, StyleSheet, Text, Image} from 'react-native';
 import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
 import {Avatar, Title} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import img from '../assets/stan.jpg';
 const imgUri = Image.resolveAssetSource(img).uri
 
 function DrawerContent(props) {
 
     const navigation = useNavigation();
+    const [userData, setUserData] = useState(null);
+
+    useEffect(() => {
+      const unsubscribe = db
+        .collection('users')
+        .doc(auth.currentUser?.uid)
+        .onSnapshot((doc) => {
+          if (doc.exists) {
+            setUserData(doc.data());
+          }
+        });
+  
+      return () => unsubscribe();
+    }, []);
 
 const DrawerList = [
   {icon: 'settings', label: 'Settings', navigateTo: 'Settings'},
 ];
 const DrawerLayout = ({icon, label, navigateTo}) => {
 
-  // console.log(userData);
   return (
     <DrawerItem
       icon={() => <Ionicons name={icon} color='#8a344c' size={24} />}
@@ -29,7 +42,7 @@ const DrawerLayout = ({icon, label, navigateTo}) => {
   );
 };
 
-const DrawerItems = props => {
+const DrawerItems = () => {
     return DrawerList.map((el, i) => {
       return (
         <DrawerLayout
@@ -70,9 +83,9 @@ const DrawerItems = props => {
                     />
                     
                     <View style={{flexDirection: 'column', }}>
-                      <Title style={styles.title}>{auth.currentUser?.uid}</Title>
+                      <Title style={styles.title}>{userData?.username}</Title>
                       <Text style={styles.caption} numberOfLines={1}>
-                      {auth.currentUser?.email}
+                      {userData?.First_Name} {userData?.Surname}
                       </Text>
                     </View>
               </View>
@@ -113,13 +126,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 16,
-    marginTop: 3,
+    fontSize: 20,
+    marginTop: 5,
     fontWeight: 'bold',
     textAlign: 'center'
   },
   caption: {
-    fontSize: 13,
+    fontSize: 15,
     lineHeight: 14,
     // color: '#6e6e6e',
     textAlign: 'center'
