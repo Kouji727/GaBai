@@ -4,8 +4,7 @@
     "slug": "Ga-Bai",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/yabag.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -14,17 +13,39 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "userInterfaceStyle": "light",
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kouji727.GaBai"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.kouji727.GaBai"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "build": {
+          "android": {
+            "release": {
+              "keystore": "/keykou.p12",
+              "keystorePassword": "Kouji5253",
+              "keyAlias": "kou",
+              "keyPassword": "Kouji5253"
+            }
+          }
+        },
+        "projectId": "73eb3ced-cd9c-410d-86f1-d165c210893f"
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Alert, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Alert, ScrollView, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import {db, streamPosts } from '../firebase';
 import { FontAwesome } from '@expo/vector-icons';
 
@@ -43,6 +43,7 @@ export default function Community() {
 
     }
 
+    const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState();
 
     const mapDocToPost = (document) => {
@@ -60,35 +61,16 @@ export default function Community() {
                 const posts = querySnapshot
                 .docs.map(docSnapshot => mapDocToPost(docSnapshot))
                 setPosts(posts)
+                setLoading(false);
             },
-            error: (error) => console.log(error)
+            error: (error) => {
+                console.log(error);
+                setLoading(false);
+            }
         });
 
         return unsubscribe
     }, [setPosts])
-
-            /*
-            useEffect( () => {
-                const unsubscribe = db.collection('posts')
-                .onSnapshot(snapshot => {
-                    const postsData = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        username: doc.data().username,
-                        title: doc.data().title,
-                        date: doc.data().date.toDate().toLocaleString()
-                    }));
-                    setPosts(postsData);
-                });
-
-                return () => unsubscribe();
-            }, [])
-
-            */
-
-
-
-    
-
 
     return (
         <MenuProvider>
@@ -107,16 +89,15 @@ export default function Community() {
                     </View>
 
                 <View style={styles.content}>
-
-
-                    {/* {
-                        posts?.map(post => <CounselorPostDesign key={post.id} item={post} />)
-                    } */}
-
-                    {
-                        posts?.map(post => <UserPostDesign key={post.id} item={post} />)
-                    }
-
+                    {loading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#8a344c" />
+                        </View>
+                    ) : (
+                        <>
+                            {posts?.map(post => <UserPostDesign key={post.id} item={post} />)}
+                        </>
+                    )}
                 </View>
 
             </ScrollView>
@@ -158,5 +139,9 @@ const styles = StyleSheet.create({
         borderRadius: 90,
     },
 
-
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 })

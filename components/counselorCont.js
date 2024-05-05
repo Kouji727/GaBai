@@ -14,7 +14,7 @@ export default function CounselorCont({ item }) {
 
                     <Image
                     style={styles.pfp}
-                    source={require(`../assets/Neil Tamondong.jpg`)} // Use require for local images
+                    source={require(`../assets/p.jpg`)} // Use require for local images
                     onError={(error) => console.error('Image loading error:', error)} // Handle errors
                     />
 
@@ -28,8 +28,8 @@ export default function CounselorCont({ item }) {
                 </View>
 
                 <View style={styles.counselorDesc}>
-                    <Text>Institutional Guidance Counselor
-                        Bachelor of Science in Industrial Education, BulSU.
+                    <Text style={{textAlign: 'center', fontSize: 15}}>Institutional Guidance Counselor{'\n'}
+                        Bachelor of Science in Industrial Education, BulSU.{'\n'}
                         Master of Arts in School Counselling, DLSU.</Text>
                 </View>
                 
@@ -44,12 +44,13 @@ export default function CounselorCont({ item }) {
 const styles = StyleSheet.create({
 
     counselorCont: {
-        backgroundColor: 'white',
+        backgroundColor: '#F3E8EB',
         width: '85%',
         height: 'auto',
         borderRadius: 10,
         justifyContent: 'center',
-        elevation: 10
+        elevation: 10,
+        paddingVertical: 15
         
 
     },
@@ -79,12 +80,13 @@ const styles = StyleSheet.create({
 
     textC: {
         fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: 20,
 
     },
 
     counselorDesc: {
         alignItems: 'center',
+        paddingTop: 10,
         padding: 25
 
     },

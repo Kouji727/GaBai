@@ -1,118 +1,120 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Image, FlatList, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Image, FlatList, TouchableWithoutFeedback, TouchableOpacity, Modal, TouchableOpacityBase } from 'react-native';
 import { auth } from '../firebase';
 import CounselorCont from '../components/counselorCont';
+import CounselorIcons from '../components/counselorIcons';
+import { Ionicons } from '@expo/vector-icons';
 
 const Home = () => {
 
-const [content, setContent] = useState([
-    { text: 'Jilian Cheila', key: '1' },
-    { text: 'Neil Tamondong', key: '2' }
-]);
+    const [modalVisible, setModalVisible] = useState(false);
 
-return (
-    <ScrollView style={styles.container}
-    showsVerticalScrollIndicator={false}>
+    const toggleModal = () => {
+        setModalVisible(!modalVisible);
+    };
 
-        <View style={styles.conCont}>
-            <View>
-                <Text>Welcome! {auth.currentUser?.email}</Text>
-            </View>
+    return (
+        <ScrollView style={styles.container}
+        showsVerticalScrollIndicator={false}>
 
-            <View style={styles.tempCon}>
-                <Text>This is Gabai</Text>
-            </View>
+            <Modal
+                transparent={true}
+                visible={modalVisible}
+                animationType="slide"
+                onRequestClose={() => {}}>
+                    <View style={styles.modalContainer}>
+                        <CounselorCont item="First Surname" />
 
-            <View style={styles.tempCon}>
-                <Text>About our Guidance</Text>
-            </View>
+                    <TouchableOpacity style={styles.modalRemoveButton} onPress={toggleModal}>
+                        <View>
+                            <Ionicons name="arrow-down" size={24} color="#8a344c" />
+                        </View>
+                    </TouchableOpacity>
 
-            <View style={styles.counselorHeader}>
-                <Text style={styles.textext}>Our Counselors</Text>
-
-                <ScrollView horizontal={true}
-                showsHorizontalScrollIndicator={false}>
-                    <View style={styles.counselorRowList}>
-                        <TouchableOpacity style={styles.counselorIcons}>
-                            <Image
-                            style={styles.pfp}
-                            source={require('../assets/Neil Tamondong.jpg')} // Use require for local images
-                            onError={(error) => console.error('Image loading error:', error)} // Handle errors
-                            />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.counselorIcons}>
-                            <Image
-                            style={styles.pfp}
-                            source={require('../assets/Neil Tamondong.jpg')} // Use require for local images
-                            onError={(error) => console.error('Image loading error:', error)} // Handle errors
-                            />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.counselorIcons}>
-                            <Image
-                            style={styles.pfp}
-                            source={require('../assets/Neil Tamondong.jpg')} // Use require for local images
-                            onError={(error) => console.error('Image loading error:', error)} // Handle errors
-                            />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.counselorIcons}>
-                            <Image
-                            style={styles.pfp}
-                            source={require('../assets/Neil Tamondong.jpg')} // Use require for local images
-                            onError={(error) => console.error('Image loading error:', error)} // Handle errors
-                            />
-                        </TouchableOpacity>
                     </View>
-                </ScrollView>
-            </View>
 
-            <CounselorCont item="name" />
+            </Modal>
 
-            <View style={styles.tempCon}>
-                <Text>About our Guidance</Text>
-            </View>
+            <View style={styles.conCont}>
+                <View>
+                    <Text>Welcome! {auth.currentUser?.email}</Text>
+                </View>
 
-            <View style={styles.tempCon}>
-                <Text>Our Counselors</Text>
+                <View style={styles.tempCon}>
+                    <Text>Ga-Bai</Text>
+                    <Text>Learn More</Text>
+                </View>
+
+                <View style={styles.tempCon}>
+                    <Text>About our Guidance</Text>
+                </View>
+
+                <View style={styles.counselorHeader}>
+                    <Text style={styles.textext}>Our Counselors</Text>
+
+                    <ScrollView horizontal={true}
+                    showsHorizontalScrollIndicator={true}>
+                        <View style={styles.counselorRowList}>
+                            <CounselorIcons onPress={toggleModal}/>
+                            <CounselorIcons onPress={toggleModal}/>
+                            <CounselorIcons onPress={toggleModal}/>
+                            <CounselorIcons onPress={toggleModal}/>
+                        </View>
+                    </ScrollView>
+                </View>
             </View>
-        </View>
-    </ScrollView>
-)
+        </ScrollView>
+    )
 }
 
 const styles = StyleSheet.create({
 
+modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+},
+
+modalRemoveButton: {
+    width: '15%',
+    aspectRatio: 1, // To make it a square
+    backgroundColor: '#F3E8EB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 100, // To make it a circle
+    marginTop: 20
+},
+
 container: {
-    flexGrow: 1,
-    backgroundColor: '#edd9df'
+    flex: 1,
+    backgroundColor: '#F3E8EB',
 },
 
 conCont: {
-    backgroundColor: 'pink',
     alignItems: 'center'
 },
 
 tempCon: {
     width: '85%',
-    paddingVertical: 100,
+    paddingVertical: 50,
     backgroundColor: 'white',
     margin: 10,
     alignItems: 'center'
 },
 
 counselorHeader: {
-    width: '100%',
+    width: '85%',
     height: 'auto',
     backgroundColor: 'white',
     margin: 10,
+    borderRadius: 10,
+    paddingVertical: 10
 },
 
 counselorRowList: {
     width: '100%',
     flexDirection: 'row',
-    backgroundColor: 'white'
 },
 
 smallViewCounselor: {
@@ -121,28 +123,12 @@ smallViewCounselor: {
 },
 
 textext: {
+    fontSize: 25,
+    fontWeight: 'bold',
     alignSelf: 'center',
     padding: 10,
 },
 
-counselorIcons: {
-    width: 100,
-    height: 100,
-    marginVertical: 10,
-    //backgroundColor: 'blue',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 25,
-    marginHorizontal: 5
-},
-
-pfp: {
-    width: 95,
-    height: 95,
-    backgroundColor: 'black',
-    borderRadius: 100,
-    margin: 10,
-},
 })
 
 export default Home

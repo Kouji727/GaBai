@@ -11,17 +11,17 @@ export default function Inspo() {
 
     return (
         <View style={styles.container}>
+{/* 
+        <View style={styles.inspoInfo}>
+            <Text style={styles.textInspoInfo}>
+                INSPO
+            </Text>
 
-            <View style={styles.inspoInfo}>
-                <Text style={styles.textInspoInfo}>
-                    INSPO
-                </Text>
+            <Text>
+                page description
+            </Text>
 
-                <Text>
-                    page description
-                </Text>
-
-            </View>
+        </View> */}
 
             <View style={styles.quoteContainer}>
                 <Text style={styles.qotdText}>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        backgroundColor: '#edd9df'
+        backgroundColor: '#F3E8EB'
         //backgroundColor: 'yellow'
     },
 
