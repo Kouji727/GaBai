@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
 import { db } from '../firebase';
 import EditPostCounselor from './editPostCounselor';
+import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
 
 const CounselorPostDesign = ({ item }) => {
@@ -14,6 +15,12 @@ const CounselorPostDesign = ({ item }) => {
 
     const toggleModal = () => {
         setModalVisible(!modalVisible);
+    };
+
+    const [modalImgVisible, setModalImgVisible] = useState(false);
+
+    const toggleImgModal = () => {
+        setModalImgVisible(!modalImgVisible);
     };
 
     const submit = () => {
@@ -58,8 +65,8 @@ const CounselorPostDesign = ({ item }) => {
 return (
         <View style={styles.allCont}>
 
-            <Modal
-                transparent={true}
+            <Modal 
+                transparent={true} 
                 visible={modalVisible}
                 animationType="slide"
                 onRequestClose={() => {}}>
@@ -69,6 +76,23 @@ return (
 
             </Modal>
 
+            <Modal
+                visible={modalImgVisible}
+                transparent={true}
+                animationType="fade">
+
+                    <ImageViewer
+                    imageUrls={[{ url: 'https://th.bing.com/th/id/OIP.GVBRIvS7K-2gLi1SjSzr4QHaEo?rs=1&pid=ImgDetMain'}]}
+                    enableSwipeDown={true}
+                    onSwipeDown={toggleImgModal}
+                    renderIndicator={() => null}
+                    style={styles.modalImage}/>
+
+                <TouchableOpacity style={styles.closeButton} onPress={toggleImgModal}>
+                    <Ionicons name="close-circle" size={34} color="white" />
+                </TouchableOpacity>
+            </Modal>
+
             <View style={{margin: 5}}>
                 <View style={styles.profileName}>
                     
@@ -76,13 +100,11 @@ return (
                             <View style={styles.pfpCont}>
 
                                 <TouchableOpacity>
-
-                                <Image
-                                    source={require('../assets/stan.jpg')}
-                                    style={styles.pfp}
-                                    resizeMode="contain"
-                                />
-
+                                    <Image
+                                        source={require('../assets/stan.jpg')}
+                                        style={styles.pfp}
+                                        resizeMode="contain"
+                                    />
                                 </TouchableOpacity>
 
                             </View>
@@ -135,11 +157,10 @@ return (
                 </View>
 
                 <View style={styles.postPic}>
-                        <TouchableOpacity style={styles.imageContainer}>
-                            <Image
-                            source={require('../assets/bg.jpg')}
-                            style={styles.image}
-                            />
+                        <TouchableOpacity style={styles.imageContainer} onPress={toggleImgModal}>
+                        <Image
+                            source={{ uri: 'https://th.bing.com/th/id/OIP.GVBRIvS7K-2gLi1SjSzr4QHaEo?rs=1&pid=ImgDetMain' }}
+                            style={styles.image}/>
                         </TouchableOpacity>
                 </View>
                 
@@ -278,6 +299,17 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         aspectRatio: 1,
         borderRadius: 15,
+    },
+
+    modalImage: {
+        flex: 1,
+        backgroundColor: 'black',
+    },
+
+    closeButton: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
     },
 
 
