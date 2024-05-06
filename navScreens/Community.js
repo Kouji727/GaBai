@@ -80,7 +80,9 @@ export default function Community() {
                     ) : (
                         <>
                             {posts?.map(post => <UserPostDesign key={post.id} item={post} />)}
+                            {posts?.map(post => <CounselorPostDesign key={post.id} item={post} />)}
                         </>
+                        
                     )}
                 </View>
 

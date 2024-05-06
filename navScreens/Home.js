@@ -82,16 +82,25 @@ const Home = () => {
                 <View style={styles.counselorHeader}>
                     <Text style={styles.textext}>Our Counselors</Text>
 
-                    <ScrollView horizontal={true}
-                    showsHorizontalScrollIndicator={true}>
+                    <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={true}
+                        contentContainerStyle={styles.scrolly}
+                    >
                         <View style={styles.counselorRowList}>
                             {loading ? (
-                            <View style={styles.loadingContainer}>
-                                <ActivityIndicator size="large" color="#8a344c" />
-                            </View>
+                                <View style={styles.loadingContainer}>
+                                    <ActivityIndicator size="large" color="#8a344c" />
+                                </View>
                             ) : (
                                 <>
-                                    {counselors.map(counselor => <CounselorIcons key={counselor.id} item={counselor} onPress={() => toggleModal(counselor)} />)}
+                                    {counselors.map(counselor => (
+                                        <CounselorIcons
+                                            key={counselor.id}
+                                            item={counselor}
+                                            onPress={() => toggleModal(counselor)}
+                                        />
+                                    ))}
                                 </>
                             )}
                         </View>
@@ -104,65 +113,70 @@ const Home = () => {
 
 const styles = StyleSheet.create({
 
-modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-},
+    scrolly: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 
-modalRemoveButton: {
-    width: '15%',
-    aspectRatio: 1, // To make it a square
-    backgroundColor: '#F3E8EB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 100, // To make it a circle
-    marginTop: 20
-},
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
 
-container: {
-    flex: 1,
-    backgroundColor: '#F3E8EB',
-},
+    modalRemoveButton: {
+        width: '15%',
+        aspectRatio: 1,
+        backgroundColor: '#F3E8EB',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 100,
+        marginTop: 20
+    },
 
-conCont: {
-    alignItems: 'center'
-},
+    container: {
+        flex: 1,
+        backgroundColor: '#F3E8EB',
+    },
 
-tempCon: {
-    width: '85%',
-    paddingVertical: 50,
-    backgroundColor: 'white',
-    margin: 10,
-    alignItems: 'center'
-},
+    conCont: {
+        alignItems: 'center'
+    },
 
-counselorHeader: {
-    width: '85%',
-    height: 'auto',
-    backgroundColor: 'white',
-    margin: 10,
-    borderRadius: 10,
-    paddingVertical: 10
-},
+    tempCon: {
+        width: '85%',
+        paddingVertical: 50,
+        backgroundColor: 'white',
+        margin: 10,
+        alignItems: 'center'
+    },
 
-counselorRowList: {
-    width: '100%',
-    flexDirection: 'row',
-},
+    counselorHeader: {
+        width: '85%',
+        height: 'auto',
+        backgroundColor: 'white',
+        margin: 10,
+        borderRadius: 10,
+        paddingVertical: 10
+    },
 
-smallViewCounselor: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-},
+    counselorRowList: {
+        flexDirection: 'row',
+    },
 
-textext: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    padding: 10,
-},
+    smallViewCounselor: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+    },
+
+    textext: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        alignSelf: 'center',
+        padding: 10,
+    },
 
 })
 

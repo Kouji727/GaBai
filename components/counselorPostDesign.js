@@ -1,10 +1,53 @@
 import React from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal } from 'react-native'
 import { Octicons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useState } from 'react';
+import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
+import { db } from '../firebase';
+import EditPostCounselor from './editPostCounselor';
+import { Ionicons } from '@expo/vector-icons';
 
-const CounselorPostDesign = ({item}) => {
+const CounselorPostDesign = ({ item }) => {
+
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const toggleModal = () => {
+        setModalVisible(!modalVisible);
+    };
+
+    const submit = () => {
+        toggleModal()
+    }
+
+    const editOption = () => {
+        toggleModal();
+    };
+
+    
+    const deleteOption = () => {
+        Alert.alert(
+            'Delete Post?',
+            'Are you sure you want to delete this post?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                { text: 'Delete', onPress: deletePost },
+            ],
+            { cancelable: true }
+        );
+    };
+    
+    const deletePost = async () => {
+        try {
+            await db.collection('posts').doc(item.id).delete();
+            console.log('Post deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting post: ', error);
+        }
+    };
 
     const [isLiked, setIsLiked] = useState(false);
 
@@ -13,9 +56,18 @@ const CounselorPostDesign = ({item}) => {
     };
 
 return (
-
-
         <View style={styles.allCont}>
+
+            <Modal
+                transparent={true}
+                visible={modalVisible}
+                animationType="slide"
+                onRequestClose={() => {}}>
+                    <View style={styles.modalContainer}>
+                        <EditPostCounselor item={item} onPress={toggleModal} submit={() => setModalVisible(false)}/>
+                    </View>
+
+            </Modal>
 
             <View style={{margin: 5}}>
                 <View style={styles.profileName}>
@@ -52,12 +104,25 @@ return (
                         </View>
 
                         <View style={styles.settingsIcon}>
-                            <TouchableOpacity>
-                                <View style={{ width: 17, height: 17, transform: [{ rotate: '90deg' }] }}>
-                                    <Octicons name="kebab-horizontal" size={17} color="black" />
-                                </View>
 
-                            </TouchableOpacity>
+                            <Menu>
+                                <MenuTrigger>
+                                        <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
+                                            <Octicons name="kebab-horizontal" size={20} color="black" />
+                                        </View>
+                                </MenuTrigger>
+
+                                <MenuOptions customStyles={menuStyles}>
+                                    <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
+                                        <Text style={styles.menuItemTextStyle}>Edit</Text>
+                                    </MenuOption>
+
+                                    <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
+                                        <Text style={styles.menuItemTextStyle}>Delete</Text>
+                                    </MenuOption>
+                                </MenuOptions>
+                            </Menu>
+
                             
                         </View>
                 </View>
@@ -95,7 +160,6 @@ return (
 
 
         </View>
-
     )
 }
 
@@ -103,6 +167,40 @@ export default CounselorPostDesign
 
 
 const styles = StyleSheet.create({
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    
+    modalRemoveButton: {
+        width: '15%',
+        aspectRatio: 1, // To make it a square
+        backgroundColor: '#F3E8EB',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 100, // To make it a circle
+        marginTop: 10
+    },
+
+    modalEditButton: {
+        width: '25%',
+        height: 35,
+        backgroundColor: '#F3E8EB',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 25,
+        marginTop: 10,
+    },
+
+    twoButtonsBelow: {
+        width: '95%',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        backgroundColor: 'red'
+    },
 
     allCont: {
         alignSelf: 'center',
@@ -144,6 +242,24 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
 
+    lowerButtonCont: {
+        flexDirection: 'row',
+        marginVertical: 15,
+        justifyContent: 'space-around',
+    },
+
+    icontainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    menuItemStyle: {
+        padding: 10,
+    },
+
+    menuItemTextStyle: {
+        fontSize: 16,
+    },
+
     postPic: {
         marginTop: 10,
         
@@ -164,15 +280,14 @@ const styles = StyleSheet.create({
         borderRadius: 15,
     },
 
-    lowerButtonCont: {
-        flexDirection: 'row',
-        marginVertical: 15,
-        justifyContent: 'space-around',
-    },
 
-    icontainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
+});
 
-})
+const menuStyles = {
+    optionsContainer: {
+        marginTop: -50,
+        backgroundColor: '#F5F5F5',
+        padding: 1,
+        borderRadius: 10,
+    },
+};
