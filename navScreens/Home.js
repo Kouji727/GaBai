@@ -1,37 +1,71 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import CounselorCont from '../components/counselorCont';
 import CounselorIcons from '../components/counselorIcons';
 import { Ionicons } from '@expo/vector-icons';
+import { db, streamCounselor } from '../firebase';
 
 const Home = () => {
 
     const [modalVisible, setModalVisible] = useState(false);
+    const [selectedCounselor, setSelectedCounselor] = useState(null); // Add selectedCounselor state
 
-    const toggleModal = () => {
+
+    const toggleModal = (item) => {
         setModalVisible(!modalVisible);
+        setSelectedCounselor(item);
     };
 
+    const [loading, setLoading] = useState(true);
+    const [counselors, setCounselor] = useState([]);
+
+
+    const mapDocToPost = (document) => {
+        return {
+            id: document.id,
+            username: document.data().username,
+            Position: document.data().Position,
+            Degree: document.data().Degree,
+            Masteral: document.data().Masteral,
+        }
+    }
+
+    useEffect( () => {
+        const unsubscribe = streamCounselor({
+            next: querySnapshot => {
+                const counselors = querySnapshot.docs
+                    .filter(docSnapshot => docSnapshot.data().role === "counselor") // Filter only counselors
+                    .map(docSnapshot => mapDocToPost(docSnapshot));
+                setCounselor(counselors);
+                setLoading(false);
+            },
+            error: (error) => {
+                console.log(error);
+                setLoading(false);
+            }
+        });
+
+        return unsubscribe;
+    }, [])
+
     return (
-        <ScrollView style={styles.container}
-        showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
             <Modal
                 transparent={true}
                 visible={modalVisible}
                 animationType="slide"
-                onRequestClose={() => {}}>
+                onRequestClose={() => setModalVisible(false)}>
                     <View style={styles.modalContainer}>
-                        <CounselorCont item="First Surname" />
+                        {selectedCounselor && <CounselorCont item={selectedCounselor} />}
 
-                    <TouchableOpacity style={styles.modalRemoveButton} onPress={toggleModal}>
+                    <TouchableOpacity style={styles.modalRemoveButton} onPress={() => setModalVisible(false)}>
                         <View>
                             <Ionicons name="arrow-down" size={24} color="#8a344c" />
                         </View>
                     </TouchableOpacity>
 
                     </View>
-
             </Modal>
 
             <View style={styles.conCont}>
@@ -51,10 +85,15 @@ const Home = () => {
                     <ScrollView horizontal={true}
                     showsHorizontalScrollIndicator={true}>
                         <View style={styles.counselorRowList}>
-                            <CounselorIcons onPress={toggleModal}/>
-                            <CounselorIcons onPress={toggleModal}/>
-                            <CounselorIcons onPress={toggleModal}/>
-                            <CounselorIcons onPress={toggleModal}/>
+                            {loading ? (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="large" color="#8a344c" />
+                            </View>
+                            ) : (
+                                <>
+                                    {counselors.map(counselor => <CounselorIcons key={counselor.id} item={counselor} onPress={() => toggleModal(counselor)} />)}
+                                </>
+                            )}
                         </View>
                     </ScrollView>
                 </View>

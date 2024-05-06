@@ -21,16 +21,18 @@ export default function CounselorCont({ item }) {
 
                     <View style={styles.pfpName}>
                         <Text style={styles.textC}>
-                            {item}
+                            {item.username}
                         </Text>
                     </View>
 
                 </View>
 
                 <View style={styles.counselorDesc}>
-                    <Text style={{textAlign: 'center', fontSize: 15}}>Institutional Guidance Counselor{'\n'}
-                        Bachelor of Science in Industrial Education, BulSU.{'\n'}
-                        Master of Arts in School Counselling, DLSU.</Text>
+                    <Text style={{textAlign: 'center', fontSize: 15}}>
+                        {item.Position} {'\n'}
+                        {item.Degree}{'\n'}
+                        {item.Masteral}
+                        </Text>
                 </View>
                 
             </View>

@@ -17,10 +17,11 @@ import CreatePost from '../documents/CreatePost';
 export default function Community() {
 
     const navigation = useNavigation();
-
+    
+    const [modalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState();
-    const [modalVisible, setModalVisible] = useState(false);
+
 
     const mapDocToPost = (document) => {
         return {

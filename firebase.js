@@ -34,4 +34,8 @@ export const streamPosts = (observer) => {
     db.collection('posts').onSnapshot(observer)
 }
 
+export const streamCounselor = (observer) => {
+    db.collection('users').onSnapshot(observer)
+}
+
 export { auth, db };

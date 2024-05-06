@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, TouchableOpacity, Image } from 'react-native'
 
-const CounselorIcons = ({ onPress }) => {
+const CounselorIcons = ({ onPress}) => {
     return (
         <TouchableOpacity style={styles.counselorIcons} onPress={onPress}>
         <Image
