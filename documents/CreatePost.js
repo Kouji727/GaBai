@@ -69,14 +69,6 @@ const CreatePost = ({cancel, closeAfter}) => {
                                     autoFocus={true} />
                                 { errors['username'] ? <Text style={styles.error}>{errors['username']}</Text> : null}
 
-
-                                <View style={styles.datePosted}>
-                                    <Text style={{color: 'grey', fontSize: 12}}>
-                                        date
-                                    </Text>
-                                    
-                                </View>
-
                             </View>
 
                     </View>

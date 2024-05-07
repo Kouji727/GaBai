@@ -80,7 +80,7 @@ return (
                                 <Image
                                     source={require('../assets/stan.jpg')}
                                     style={styles.pfp}
-                                    resizeMode="contain"
+                                    resizeMode="cover"
                                 />
 
                                 </TouchableOpacity>

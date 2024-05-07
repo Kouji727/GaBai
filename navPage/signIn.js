@@ -20,8 +20,15 @@ const SignIn = () => {
         headerTitleAlign: 'center'}}>
         <Stack.Screen options={{headerShown: false}} name="Login" component={LoginPage} />
         <Stack.Screen name="MainScreen" component={MainScreen} />
-        <Stack.Screen name="Settings" component={Settings} 
-        options={screenOptions={headerShown: true}}/>
+        <Stack.Screen
+          name="Settings"
+          component={Settings}
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: 'pink' },
+          }}
+        />
+
         <Stack.Screen name="CreatePost" component={CreatePost} />
       </Stack.Navigator>
     </NavigationContainer>

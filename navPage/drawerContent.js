@@ -85,7 +85,7 @@ const DrawerItems = () => {
                     <View style={{flexDirection: 'column', }}>
                       <Title style={styles.title}>{userData?.username}</Title>
                       <Text style={styles.caption} numberOfLines={1}>
-                        {userData?.First_Name} {userData?.Surname}
+                        {userData?.['first name']} {userData?.surname}
                       </Text>
                     </View>
               </View>

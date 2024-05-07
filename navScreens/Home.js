@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         alignSelf: 'center',
         padding: 10,
+        color: '#8a344c'
     },
 
 })

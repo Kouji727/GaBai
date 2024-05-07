@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal } from 'react-native'
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TouchableHighlight } from 'react-native'
 import { Octicons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useState } from 'react';
@@ -103,7 +103,7 @@ return (
                                     <Image
                                         source={require('../assets/stan.jpg')}
                                         style={styles.pfp}
-                                        resizeMode="contain"
+                                        resizeMode="cover"
                                     />
                                 </TouchableOpacity>
 
@@ -157,11 +157,11 @@ return (
                 </View>
 
                 <View style={styles.postPic}>
-                        <TouchableOpacity style={styles.imageContainer} onPress={toggleImgModal}>
+                        <TouchableHighlight style={styles.imageContainer} onPress={toggleImgModal}>
                         <Image
                             source={{ uri: 'https://th.bing.com/th/id/OIP.GVBRIvS7K-2gLi1SjSzr4QHaEo?rs=1&pid=ImgDetMain' }}
                             style={styles.image}/>
-                        </TouchableOpacity>
+                        </TouchableHighlight>
                 </View>
                 
                 <View style={styles.lowerButtonCont}> 

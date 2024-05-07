@@ -1,15 +1,15 @@
 import React from 'react'
-import { StyleSheet, TouchableOpacity, Image } from 'react-native'
+import { StyleSheet, Image, TouchableHighlight } from 'react-native'
 
 const CounselorIcons = ({ onPress}) => {
     return (
-        <TouchableOpacity style={styles.counselorIcons} onPress={onPress}>
+        <TouchableHighlight style={styles.counselorIcons} onPress={onPress}>
         <Image
         style={styles.pfp}
         source={require('../assets/p.jpg')} // Use require for local images
         onError={(error) => console.error('Image loading error:', error)} // Handle errors
         />
-    </TouchableOpacity>
+    </TouchableHighlight>
     )
 }
 
@@ -24,8 +24,9 @@ counselorIcons: {
     //backgroundColor: 'blue',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 25,
-    marginHorizontal: 5
+    borderRadius: 100,
+    marginHorizontal: 5,
+    elevation: 3
 },
 
 pfp: {
@@ -34,5 +35,7 @@ pfp: {
     backgroundColor: 'black',
     borderRadius: 100,
     margin: 10,
+    borderWidth: 2,
+    borderColor: '#F3E8EB'
 },
 })
