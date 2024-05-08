@@ -24,9 +24,9 @@ const Home = () => {
         return {
             id: document.id,
             username: document.data().username,
-            Position: document.data().Position,
-            Degree: document.data().Degree,
-            Masteral: document.data().Masteral,
+            info1: document.data().info1,
+            info2: document.data().info2,
+            info3: document.data().info3,
         }
     }
 
@@ -34,7 +34,7 @@ const Home = () => {
         const unsubscribe = streamCounselor({
             next: querySnapshot => {
                 const counselors = querySnapshot.docs
-                    .filter(docSnapshot => docSnapshot.data().role === "counselor") // Filter only counselors
+                    .filter(docSnapshot => docSnapshot.data().role === "admin") // Filter only counselors
                     .map(docSnapshot => mapDocToPost(docSnapshot));
                 setCounselor(counselors);
                 setLoading(false);

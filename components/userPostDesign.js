@@ -17,7 +17,7 @@ const UserPostDesign = ({ item }) => {
     };
 
     const submit = () => {
-        toggleModal()
+        setModalVisible(false);
     }
 
     const editOption = () => {
@@ -42,7 +42,7 @@ const UserPostDesign = ({ item }) => {
     
     const deletePost = async () => {
         try {
-            await db.collection('posts').doc(item.id).delete();
+            await db.collection('threads').doc(item.id).delete();
             console.log('Post deleted successfully!');
         } catch (error) {
             console.error('Error deleting post: ', error);
@@ -78,7 +78,7 @@ return (
                                 <TouchableOpacity>
 
                                 <Image
-                                    source={require('../assets/stan.jpg')}
+                                    source={require('../assets/defaultPfp.jpg')}
                                     style={styles.pfp}
                                     resizeMode="cover"
                                 />
@@ -96,7 +96,7 @@ return (
 
                             <View style={styles.datePosted}>
                                 <Text style={{color: 'grey', fontSize: 12}}>
-                                    {item.date}
+                                    {item.createdAt}
                                 </Text>
                                 
                             </View>
@@ -129,7 +129,7 @@ return (
 
                 <View style={styles.postTitle}>
                     <Text style={{fontWeight: 'bold', fontSize: 18}}>
-                        {item.title}
+                        {item.content}
                     </Text>
 
                 </View>

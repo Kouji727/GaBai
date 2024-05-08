@@ -39,7 +39,7 @@ export default function Settings() {
         try {
             const userRef = firebase.firestore().collection('users').doc(uid);
             const unsubscribe = userRef.onSnapshot((doc) => {
-                const pfpURL = doc.data().pfp;
+                const pfpURL = doc.data().img;
                 if (pfpURL) {
                     setFirebaseImageUrl(pfpURL);
                 } else {
@@ -103,14 +103,14 @@ export default function Settings() {
             const downloadURL = await ref.getDownloadURL();
 
             // Delete the previous profile picture
-            if (userData.pfp) {
-                await deletePfp(userData.pfp);
+            if (userData.img) {
+                await deletePfp(userData.img);
             }
 
             // Update Firestore with the new image link
             const uid = auth.currentUser.uid;
             await db.collection('users').doc(uid).set({
-                pfp: downloadURL
+                img: downloadURL
             }, { merge: true });
 
             setFirebaseImageUrl(downloadURL);
@@ -165,7 +165,7 @@ export default function Settings() {
 
             // Clear the pfp field in the user's document
             const uid = auth.currentUser.uid;
-            await db.collection('users').doc(uid).update({ pfp: firebase.firestore.FieldValue.delete() });
+            await db.collection('users').doc(uid).update({ img: firebase.firestore.FieldValue.delete() });
 
             setFirebaseImageUrl(null);
             setDeleting(false);
@@ -200,7 +200,7 @@ export default function Settings() {
                         {deleting && (
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="large" color="#8a344c" />
-                                <Text style={styles.uploadingText}>Deleting...</Text>
+                                <Text style={styles.uploadingText}>Deleting Previous Picture...</Text>
                             </View>
                         )}
                         <View style={styles.threeButtons}>
@@ -212,7 +212,7 @@ export default function Settings() {
                                 <Ionicons name="image-outline" size={24} color="#8a344c" />
                                 <Text style={styles.modalButtonText}>Gallery</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.modalButton} onPress={() => deletePfp(userData.pfp)}>
+                            <TouchableOpacity style={styles.modalButton} onPress={() => deletePfp(userData.img)}>
 
                                 <Ionicons name="trash-outline" size={24} color="#8a344c" />
                                 <Text style={styles.modalButtonText}>Remove</Text>
@@ -243,7 +243,7 @@ export default function Settings() {
                     <View style={styles.textsCont}>
                         <Text style={styles.textStyle}>{userData.username}</Text>
                         <View style={styles.borderBot}>
-                            <Text style={styles.defaultText}>{userData['first name']} {userData.surname}</Text>
+                            <Text style={styles.defaultText}>{userData['first name']} {userData.displayName}</Text>
                             <Text style={[styles.defaultText, { marginBottom: 10 }]}>{userData.email}</Text>
                         </View>
                         <Text style={styles.textRoleStyle}>{userData.role}</Text>

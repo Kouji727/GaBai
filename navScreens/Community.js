@@ -20,24 +20,24 @@ export default function Community() {
     
     const [modalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [posts, setPosts] = useState();
+    const [threads, setThreads] = useState();
 
 
     const mapDocToPost = (document) => {
         return {
             id: document.id,
             username: document.data().username,
-            title: document.data().title,
-            date: document.data().date.toDate().toLocaleString()
+            content: document.data().content,
+            createdAt: document.data().createdAt.toDate().toLocaleString()
         }
     }
 
     useEffect( () => {
         const unsubscribe = streamPosts({
             next: querySnapshot => {
-                const posts = querySnapshot
+                const threads = querySnapshot
                 .docs.map(docSnapshot => mapDocToPost(docSnapshot))
-                setPosts(posts)
+                setThreads(threads)
                 setLoading(false);
             },
             error: (error) => {
@@ -47,7 +47,7 @@ export default function Community() {
         });
 
         return unsubscribe
-    }, [setPosts])
+    }, [setThreads])
 
 
 
@@ -79,8 +79,8 @@ export default function Community() {
                         </View>
                     ) : (
                         <>
-                            {posts?.map(post => <UserPostDesign key={post.id} item={post} />)}
-                            {posts?.map(post => <CounselorPostDesign key={post.id} item={post} />)}
+                            {threads?.map(thread => <UserPostDesign key={thread.id} item={thread} />)}
+                            {threads?.map(thread => <CounselorPostDesign key={thread.id} item={thread} />)}
                         </>
                         
                     )}

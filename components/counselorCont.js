@@ -28,10 +28,10 @@ export default function CounselorCont({ item }) {
                 </View>
 
                 <View style={styles.counselorDesc}>
-                    <Text style={{textAlign: 'center', fontSize: 15}}>
-                        {item.Position} {'\n'}
-                        {item.Degree}{'\n'}
-                        {item.Masteral}
+                    <Text style={{textAlign: 'center', fontSize: 15, color: '#8a344c'}}>
+                        {item.info1} {'\n'}
+                        {item.info2}{'\n'}
+                        {item.info3}
                         </Text>
                 </View>
                 
@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
     textC: {
         fontWeight: 'bold',
         fontSize: 20,
+        color: '#8a344c'
 
     },
 

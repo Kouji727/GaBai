@@ -20,10 +20,10 @@ function DrawerContent(props) {
         const unsubscribeUserData = userRef.onSnapshot(doc => {
           if (doc.exists) {
             const userData = doc.data();
-            if (userData.pfp && userData.pfp.startsWith("https://")) {
-              setUserData({ ...userData, pfpUrl: userData.pfp });
-            } else if (userData.pfp) {
-              firebase.storage().ref().child(userData.pfp).getDownloadURL().then(url => {
+            if (userData.img && userData.img.startsWith("https://")) {
+              setUserData({ ...userData, pfpUrl: userData.img });
+            } else if (userData.img) {
+              firebase.storage().ref().child(userData.img).getDownloadURL().then(url => {
                 setUserData({ ...userData, pfpUrl: url });
               }).catch(error => {
                 console.error('Error fetching profile picture:', error);
@@ -110,7 +110,7 @@ function DrawerContent(props) {
                 <View style={{ flexDirection: 'column' }}>
                   <Title style={styles.title}>{userData?.username}</Title>
                   <Text style={styles.caption} numberOfLines={1}>
-                    {userData?.['first name']} {userData?.surname}
+                    {userData?.displayName}
                   </Text>
                 </View>
               </View>
