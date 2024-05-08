@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, TextInput, Button } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { auth, db } from '../firebase';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const EditInfo = ({ item }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -39,7 +40,7 @@ const EditInfo = ({ item }) => {
         <View style={styles.editableTexts}>
             <Text style={styles.textTitles}>{item.Field}</Text>
             {isEditing ? (
-                <View style={{ alignItems: 'center' }}>
+                <View>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <TextInput
                             style={[styles.textEditableStyleEdit]}
@@ -49,7 +50,7 @@ const EditInfo = ({ item }) => {
                             multiline={value.length > 18}
                         />
                         <TouchableOpacity onPress={cancelEditing}>
-                            <Ionicons name="close-circle" size={24} color="#8a344c" />
+                            <Ionicons name="close-circle" size={20} color="#8a344c" />
                         </TouchableOpacity>
                     </View>
                     <View style={{ marginTop: 15 }}>
@@ -64,8 +65,8 @@ const EditInfo = ({ item }) => {
             ) : (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={styles.textEditableStyle}>{value}</Text>
-                    <TouchableOpacity onPress={startEditing}>
-                        <MaterialIcons name="mode-edit" size={24} color="#8a344c" />
+                    <TouchableOpacity onPress={startEditing} >
+                        <MaterialIcons name="mode-edit" size={20} color="#8a344c" />
                     </TouchableOpacity>
                 </View>
             )}
@@ -80,26 +81,28 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '80%',
-        marginBottom: 5,
+        marginBottom: 7,
+        backgroundColor: '#F0D0D9',
+        borderRadius: 5,
+        padding: 15,
+        alignItems: 'center',
     },
     textTitles: {
         fontWeight: 'bold',
-        fontSize: 20,
+        fontSize: 15,
         color: '#8a344c',
     },
     textEditableStyle: {
         marginHorizontal: 10,
-        minHeight: 35,
         width: 150,
         color: '#8a344c',
-        fontSize: 20,
+        fontSize: 15,
     },
 
     textEditableStyleEdit: {
         marginHorizontal: 10,
-        minHeight: 35,
         width: 150,
         color: 'black',
-        fontSize: 20,
+        fontSize: 15,
     },
 });

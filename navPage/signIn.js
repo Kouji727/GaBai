@@ -21,11 +21,12 @@ const SignIn = () => {
         <Stack.Screen options={{headerShown: false}} name="Login" component={LoginPage} />
         <Stack.Screen name="MainScreen" component={MainScreen} />
         <Stack.Screen
-          name="Settings"
+          name="Profile Settings"
           component={Settings}
           options={{
             headerShown: true,
             headerStyle: { backgroundColor: 'pink' },
+            headerTintColor: '#8a344c'
           }}
         />
 

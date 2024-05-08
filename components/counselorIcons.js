@@ -26,7 +26,8 @@ counselorIcons: {
     justifyContent: 'center',
     borderRadius: 100,
     marginHorizontal: 5,
-    elevation: 3
+    elevation: 3,
+    shadowColor: '#8a344c'
 },
 
 pfp: {
@@ -35,7 +36,5 @@ pfp: {
     backgroundColor: 'black',
     borderRadius: 100,
     margin: 10,
-    borderWidth: 2,
-    borderColor: '#F3E8EB'
 },
 })
