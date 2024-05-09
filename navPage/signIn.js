@@ -3,9 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import LoginPage from '../screens/login';
-import NavigationPage from './NavigationPage';
 import MainScreen from './mainscreen';
-import Schedule from '../navScreens/Schedule';
 import CreatePost from '../documents/CreatePost';
 import Settings from '../navScreens/Settings';
 

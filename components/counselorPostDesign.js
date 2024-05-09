@@ -1,15 +1,116 @@
-import React from 'react'
+import React,  {useEffect}  from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TouchableHighlight } from 'react-native'
 import { Octicons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
-import { db } from '../firebase';
+import { db, auth, firebase } from '../firebase';
 import EditPostCounselor from './editPostCounselor';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
 
 const CounselorPostDesign = ({ item }) => {
+
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+      const fetchUserData = async () => {
+          const userDoc = await db.collection('users').doc(auth.currentUser?.uid).get();
+          if (userDoc.exists) {
+              setCurrentUser(userDoc.data());
+          }
+      };
+      fetchUserData();
+  
+      const unsubscribe = db.collection('users').doc(auth.currentUser?.uid)
+          .onSnapshot((doc) => {
+              if (doc.exists) {
+                  setCurrentUser(doc.data());
+              }
+          });
+  
+      return () => unsubscribe();
+  }, []);
+
+    
+    
+  const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
+  const [firebaseImageUrlp, setFirebaseImageUrlp] = useState(null);
+
+  useEffect(() => {
+    const fetchThreadImage = async () => {
+      try {
+        const threadSnapshot = await db.collection('threads').doc(item.id).get();
+        if (threadSnapshot.exists) {
+          const threadData = threadSnapshot.data();
+          if (threadData.image && threadData.image.img) {
+            setFirebaseImageUrlp(threadData.image.img);
+          } else {
+            setFirebaseImageUrlp(null);
+          }
+        } else {
+          setFirebaseImageUrlp(null);
+        }
+      } catch (error) {
+        console.error('Error fetching thread image:', error);
+      }
+    };
+  
+    fetchThreadImage();
+  }, [item.id]);
+  
+
+  useEffect(() => {
+    const fetchUserImage = async () => {
+      try {
+        const username = item.username;
+        const userSnapshot = await db.collection('users').where('username', '==', username).get();
+        if (!userSnapshot.empty) {
+          const user = userSnapshot.docs[0].data();
+          setFirebaseImageUrl(user.img || null);
+        } else {
+          setFirebaseImageUrl(null);
+        }
+      } catch (error) {
+        console.error('Error fetching user image:', error);
+      }
+    };
+
+    fetchUserImage();
+  }, [item.username]);
+
+  
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+        setUser(user);
+    });
+    return unsubscribe;
+    }, []);
+
+    useEffect(() => {
+    const fetchPfp = async (uid) => {
+        try {
+        const userRef = firebase.firestore().collection('users').doc(uid);
+        const unsubscribe = userRef.onSnapshot((doc) => {
+            const pfpURL = doc.data().img;
+            if (pfpURL) {
+            setFirebaseImageUrl(pfpURL);
+            } else {
+            setFirebaseImageUrl(null);
+            }
+        });
+        return () => unsubscribe();
+        } catch (error) {
+        console.error(error);
+        }
+    };
+
+    if (user) {
+        fetchPfp(user.uid);
+    }
+    }, [user]);
 
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -49,12 +150,25 @@ const CounselorPostDesign = ({ item }) => {
     
     const deletePost = async () => {
         try {
-            await db.collection('posts').doc(item.id).delete();
+            // Get the post image URL
+            const threadSnapshot = await db.collection('threads').doc(item.id).get();
+            if (threadSnapshot.exists) {
+                const threadData = threadSnapshot.data();
+                if (threadData.image && threadData.image.img) {
+                    const imageUrl = threadData.image.img;
+                    // Delete the post image from Firebase Storage
+                    const imageRef = firebase.storage().refFromURL(imageUrl);
+                    await imageRef.delete();
+                }
+            }
+            // Delete the post document from Firestore
+            await db.collection('threads').doc(item.id).delete();
             console.log('Post deleted successfully!');
         } catch (error) {
             console.error('Error deleting post: ', error);
         }
     };
+    
 
     const [isLiked, setIsLiked] = useState(false);
 
@@ -62,127 +176,114 @@ const CounselorPostDesign = ({ item }) => {
         setIsLiked(!isLiked);
     };
 
-return (
+    return (
         <View style={styles.allCont}>
-
-            <Modal 
-                transparent={true} 
-                visible={modalVisible}
-                animationType="slide"
-                onRequestClose={() => {}}>
-                    <View style={styles.modalContainer}>
-                        <EditPostCounselor item={item} onPress={toggleModal} submit={() => setModalVisible(false)}/>
-                    </View>
-
-            </Modal>
-
-            <Modal
-                visible={modalImgVisible}
-                transparent={true}
-                animationType="fade">
-
-                    <ImageViewer
-                    imageUrls={[{ url: 'https://th.bing.com/th/id/OIP.GVBRIvS7K-2gLi1SjSzr4QHaEo?rs=1&pid=ImgDetMain'}]}
-                    enableSwipeDown={true}
-                    onSwipeDown={toggleImgModal}
-                    renderIndicator={() => null}
-                    style={styles.modalImage}/>
-
-                <TouchableOpacity style={styles.closeButton} onPress={toggleImgModal}>
-                    <Ionicons name="close-circle" size={34} color="white" />
-                </TouchableOpacity>
-            </Modal>
-
-            <View style={{margin: 5}}>
-                <View style={styles.profileName}>
-                    
-                        <View style={styles.topItems}>
-                            <View style={styles.pfpCont}>
-
-                                <TouchableOpacity>
-                                    <Image
-                                        source={require('../assets/stan.jpg')}
-                                        style={styles.pfp}
-                                        resizeMode="cover"
-                                    />
-                                </TouchableOpacity>
-
-                            </View>
-
-                            <View style={styles.name}>
-                                <Text style={{fontWeight: 'bold', fontSize: 12}}>
-                                    {item.username}
-                                </Text>
-                                
-                            </View>
-
-                            <View style={styles.datePosted}>
-                                <Text style={{color: 'grey', fontSize: 12}}>
-                                    {item.date}
-                                </Text>
-                                
-                            </View>
-
-                        </View>
-
-                        <View style={styles.settingsIcon}>
-
-                            <Menu>
-                                <MenuTrigger>
-                                        <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
-                                            <Octicons name="kebab-horizontal" size={20} color="black" />
-                                        </View>
-                                </MenuTrigger>
-
-                                <MenuOptions customStyles={menuStyles}>
-                                    <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
-                                        <Text style={styles.menuItemTextStyle}>Edit</Text>
-                                    </MenuOption>
-
-                                    <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
-                                        <Text style={styles.menuItemTextStyle}>Delete</Text>
-                                    </MenuOption>
-                                </MenuOptions>
-                            </Menu>
-
-                            
-                        </View>
-                </View>
-
-                <View style={styles.postTitle}>
-                    <Text style={{fontWeight: 'bold', fontSize: 18}}>
-                        {item.title}
-                    </Text>
-
-                </View>
-
-                <View style={styles.postPic}>
-                        <TouchableHighlight style={styles.imageContainer} onPress={toggleImgModal}>
-                        <Image
-                            source={{ uri: 'https://th.bing.com/th/id/OIP.GVBRIvS7K-2gLi1SjSzr4QHaEo?rs=1&pid=ImgDetMain' }}
-                            style={styles.image}/>
-                        </TouchableHighlight>
-                </View>
-                
-                <View style={styles.lowerButtonCont}> 
-                    <TouchableOpacity style={styles.icontainer} onPress={toggleLike}>
-                        <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
-                        <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}></Text>
-                        
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.icontainer}>
-                        <FontAwesome6 name="comment-alt" size={24} color="grey"/>
-                        <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}></Text>
-
-                    </TouchableOpacity>
-                </View>
+          {/* Modal components */}
+          <Modal 
+            transparent={true} 
+            visible={modalVisible}
+            animationType="slide"
+            onRequestClose={() => {}}>
+            <View style={styles.modalContainer}>
+              <EditPostCounselor item={item} onPress={toggleModal} submit={() => setModalVisible(false)}/>
             </View>
+          </Modal>
+    
+          <Modal
+            visible={modalImgVisible}
+            transparent={true}
+            animationType="fade">
+            <ImageViewer
+              imageUrls={[{ url: firebaseImageUrlp}]}
+              enableSwipeDown={true}
+              onSwipeDown={toggleImgModal}
+              renderIndicator={() => null}
+              style={styles.modalImage}/>
+    
+            <TouchableOpacity style={styles.closeButton} onPress={toggleImgModal}>
+              <Ionicons name="close-circle" size={34} color="white" />
+            </TouchableOpacity>
+          </Modal>
+    
+          <View style={{margin: 5}}>
+            <View style={styles.profileName}>
+              <View style={styles.topItems}>
+                <View style={styles.pfpCont}>
+                  <TouchableOpacity>
+                    <Image
+                      style={styles.pfp}
+                      resizeMode='cover'
+                      source={firebaseImageUrl ? { uri: firebaseImageUrl } : require('../assets/defaultPfp.jpg')}
+                      onError={(error) => console.error('Image loading error:', error)}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={{flex: 1}}>
+                  <Text style={{fontWeight: 'bold', fontSize: 12, ellipsizeMode: 'tail', numberOfLines: 1}}>
+                    {item.username}
+                  </Text>
+                  <View style={styles.datePosted}>
+                    <Text style={{color: 'grey', fontSize: 12}}>
+                      {item.createdAt}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+    
+              <View style={styles.settingsIcon}>
+{currentUser && currentUser.username === item.username && (
+    <Menu name={`menu-${item.id}`}>
+        <MenuTrigger>
+            <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
+                <Octicons name="kebab-horizontal" size={20} color="black" />
+            </View>
+        </MenuTrigger>
+        <MenuOptions customStyles={menuStyles}>
+            <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
+                <Text style={styles.menuItemTextStyle}>Edit</Text>
+            </MenuOption>
+            <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
+                <Text style={styles.menuItemTextStyle}>Delete</Text>
+            </MenuOption>
+        </MenuOptions>
+    </Menu>
+    )}
 
-
+              </View>
+            </View>
+    
+            <View style={styles.postTitle}>
+              <Text style={{fontWeight: 'bold', fontSize: 18}}>
+                {item.content}
+              </Text>
+            </View>
+    
+            {firebaseImageUrlp && (
+        <View style={styles.postPic}>
+            <TouchableHighlight style={styles.imageContainer} onPress={toggleImgModal}>
+            <Image 
+                source={{ uri: firebaseImageUrlp }} 
+                style={styles.image} />
+            </TouchableHighlight>
         </View>
-    )
-}
+        )}
+
+    
+            <View style={styles.lowerButtonCont}> 
+              <TouchableOpacity style={styles.icontainer} onPress={toggleLike}>
+                <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
+                <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}>{item.like}</Text>
+              </TouchableOpacity>
+    
+              <TouchableOpacity style={styles.icontainer}>
+                <FontAwesome6 name="comment-alt" size={24} color="grey"/>
+                <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}>{item.comment}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      );
+    }
 
 export default CounselorPostDesign
 
@@ -220,7 +321,6 @@ const styles = StyleSheet.create({
         width: '95%',
         flexDirection: 'row',
         justifyContent: 'space-around',
-        backgroundColor: 'red'
     },
 
     allCont: {
@@ -237,6 +337,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        width: '95%'
     },
 
     settingsIcon: {
@@ -265,7 +366,7 @@ const styles = StyleSheet.create({
 
     lowerButtonCont: {
         flexDirection: 'row',
-        marginVertical: 15,
+        marginTop: 10,
         justifyContent: 'space-around',
     },
 

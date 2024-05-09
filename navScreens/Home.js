@@ -27,6 +27,7 @@ const Home = () => {
             info1: document.data().info1,
             info2: document.data().info2,
             info3: document.data().info3,
+            img: document.data().img,
         }
     }
 
@@ -97,7 +98,7 @@ const Home = () => {
                                     {counselors.map(counselor => (
                                         <CounselorIcons
                                             key={counselor.id}
-                                            item={counselor}
+                                            img={counselor.img}
                                             onPress={() => toggleModal(counselor)}
                                         />
                                     ))}
@@ -105,6 +106,10 @@ const Home = () => {
                             )}
                         </View>
                     </ScrollView>
+
+                    <Text style={{fontWeight: 'bold', color: '#8a344c', paddingVertical: 10}}>
+                        Click for more info!
+                    </Text>
                 </View>
             </View>
         </ScrollView>
@@ -159,7 +164,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         margin: 10,
         borderRadius: 10,
-        paddingVertical: 10
+        paddingVertical: 10,
+        alignItems: 'center'
     },
 
     counselorRowList: {

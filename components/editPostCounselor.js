@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { db } from '../firebase';
 
 const EditPostCounselor = ({ item, onPress, submit}) => {
-    const [editedTitle, setEditedTitle] = useState(item.title);
+    const [editedTitle, setEditedTitle] = useState(item.content);
 
     const handleUpdate = () => {
-        db.collection('posts')
+        db.collection('threads')
             .doc(item.id)
-            .update({ title: editedTitle })
+            .update({ content: editedTitle })
             .then(() => {
                 console.log('Document successfully updated!');
                 submit();

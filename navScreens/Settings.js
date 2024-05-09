@@ -10,6 +10,7 @@ import { Feather } from '@expo/vector-icons';
 import 'firebase/auth';
 import 'firebase/storage';
 import 'firebase/firestore';
+import NotEditInfo from '../components/notEditInfo';
 
 export default function Settings() {
     const [userData, setUserData] = useState({});
@@ -60,7 +61,7 @@ export default function Settings() {
             quality: 1,
         });
 
-        if (!result.cancelled) {
+        if (!result.canceled) {
             setImage(result.assets[0].uri);
         }
     };
@@ -72,7 +73,7 @@ export default function Settings() {
             quality: 1,
         });
 
-        if (!result.cancelled) {
+        if (!result.canceled) {
             setImage(result.assets[0].uri);
             setModalVisible(true);
         }
@@ -80,7 +81,7 @@ export default function Settings() {
 
     const uploadMedia = async () => {
         setUploading(true);
-
+    
         try {
             const { uri } = await FileSystem.getInfoAsync(image);
             const blob = await new Promise((resolve, reject) => {
@@ -95,24 +96,25 @@ export default function Settings() {
                 xhr.open('GET', uri, true);
                 xhr.send(null);
             });
-
-            const filename = image.substring(image.lastIndexOf('/') + 1);
-            const ref = firebase.storage().ref().child(filename);
-
+    
+            const filenameWithExtension = image.substring(image.lastIndexOf('/') + 1);
+            const filename = filenameWithExtension.split('.').slice(0, -1).join('.'); // Remove extension
+            const ref = firebase.storage().ref().child('profile_images/' + filename);
+    
             await ref.put(blob);
             const downloadURL = await ref.getDownloadURL();
-
+    
             // Delete the previous profile picture
             if (userData.img) {
                 await deletePfp(userData.img);
             }
-
+    
             // Update Firestore with the new image link
             const uid = auth.currentUser.uid;
             await db.collection('users').doc(uid).set({
                 img: downloadURL
             }, { merge: true });
-
+    
             setFirebaseImageUrl(downloadURL);
             setUploading(false);
             toggleModal();
@@ -122,7 +124,8 @@ export default function Settings() {
             setUploading(false);
         }
     };
-
+    
+    //FETCH USER DATA IMPORTANT
     useEffect(() => {
         const fetchUserData = async () => {
             const userDoc = await db.collection('users').doc(auth.currentUser?.uid).get();
@@ -146,7 +149,7 @@ export default function Settings() {
         const fetchEditableData = async () => {
             const userDoc = await db.collection('users').doc(auth.currentUser?.uid).get();
             if (userDoc.exists) {
-                const fields = ['username','first name', 'surname', 'course', 'address', 'phone'];
+                const fields = ['address', 'phone'];
                 setEditableFields(fields);
             }
         };
@@ -160,13 +163,16 @@ export default function Settings() {
     const deletePfp = async (pfpURL) => {
         try {
             setDeleting(true);
+            // Extract filename from the URL
+            const filename = pfpURL.split('%2F').pop().split('?')[0]; // Line 6
+    
             // Delete the picture in storage
-            await firebase.storage().refFromURL(pfpURL).delete();
-
+            await firebase.storage().ref('profile_images/' + filename).delete(); // Line 9
+    
             // Clear the pfp field in the user's document
             const uid = auth.currentUser.uid;
-            await db.collection('users').doc(uid).update({ img: firebase.firestore.FieldValue.delete() });
-
+            await db.collection('users').doc(uid).update({ img: firebase.firestore.FieldValue.delete() }); // Line 13
+    
             setFirebaseImageUrl(null);
             setDeleting(false);
             toggleModal();
@@ -175,6 +181,10 @@ export default function Settings() {
             setDeleting(false);
         }
     };
+    
+    
+    
+    
 
     return (
         <View style={styles.container}>
@@ -248,9 +258,15 @@ export default function Settings() {
                         </View>
                         <Text style={styles.textRoleStyle}>{userData.role}</Text>
                     </View>
+
+                    <NotEditInfo fieldName={'Email'} text={userData.email}/>
                     {editableFields.map(field => (
                         <EditInfo key={field} item={{ Field: field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), Value: userData[field] || '' }} />
                     ))}
+                    <NotEditInfo fieldName={'Course'} text={userData.course}/>
+                    <NotEditInfo fieldName={'Year'} text={userData.year}/>
+                    <NotEditInfo fieldName={'Student No.'} text={userData.studentNumber}/>
+                    <NotEditInfo fieldName={'Full Name'} text={userData.displayName}/>
                 </View>
                 <View style={styles.fill} />
             </ScrollView>

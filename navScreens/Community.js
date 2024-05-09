@@ -28,7 +28,9 @@ export default function Community() {
             id: document.id,
             username: document.data().username,
             content: document.data().content,
-            createdAt: document.data().createdAt.toDate().toLocaleString()
+            createdAt: document.data().createdAt.toDate().toLocaleString(),
+            like: document.data().like,
+            comment: document.data().comment,
         }
     }
 
@@ -79,7 +81,6 @@ export default function Community() {
                         </View>
                     ) : (
                         <>
-                            {threads?.map(thread => <UserPostDesign key={thread.id} item={thread} />)}
                             {threads?.map(thread => <CounselorPostDesign key={thread.id} item={thread} />)}
                         </>
                         

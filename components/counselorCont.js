@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, Avatar } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, Avatar, TouchableHighlight } from 'react-native';
 
 
 export default function CounselorCont({ item }) {
@@ -12,11 +12,14 @@ export default function CounselorCont({ item }) {
                 </View>
                 <View style={styles.counselPicName}>
 
+<TouchableHighlight style={styles.counselorIcons}>
+
                     <Image
-                    style={styles.pfp}
-                    source={require(`../assets/p.jpg`)} // Use require for local images
-                    onError={(error) => console.error('Image loading error:', error)} // Handle errors
+                        style={styles.pfp}
+                        source={item.img ? { uri: item.img } : require('../assets/defaultPfp.jpg')}
+                        onError={(error) => console.error('Image loading error:', error)} // Handle errors
                     />
+</TouchableHighlight>
 
 
                     <View style={styles.pfpName}>
@@ -44,6 +47,19 @@ export default function CounselorCont({ item }) {
 
 
 const styles = StyleSheet.create({
+    
+    counselorIcons: {
+        width: 125,
+        height: 125,
+        marginVertical: 10,
+        //backgroundColor: 'blue',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 100,
+        marginHorizontal: 5,
+        elevation: 3,
+        shadowColor: '#8a344c',
+      },
 
     counselorCont: {
         backgroundColor: '#F3E8EB',
@@ -69,11 +85,11 @@ const styles = StyleSheet.create({
     },
 
     pfp: {
-        width: 125,
-        height: 125,
+        width: '100%',
+        height: '100%',
         backgroundColor: 'black',
         borderRadius: 100,
-        margin: 20
+        margin: 20,
     },
     
     pfpName: {
