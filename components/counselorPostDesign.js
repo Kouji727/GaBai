@@ -34,9 +34,12 @@ const CounselorPostDesign = ({ item }) => {
 
     
     
-  const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
+  const [firebaseImageUrlProfile, setFirebaseImageUrlProfile] = useState(null);
   const [firebaseImageUrlp, setFirebaseImageUrlp] = useState(null);
+  const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
 
+
+  //FETCH THE CONTENT IMAGE
   useEffect(() => {
     const fetchThreadImage = async () => {
       try {
@@ -59,25 +62,31 @@ const CounselorPostDesign = ({ item }) => {
     fetchThreadImage();
   }, [item.id]);
   
-
-  useEffect(() => {
-    const fetchUserImage = async () => {
-      try {
-        const username = item.username;
-        const userSnapshot = await db.collection('users').where('username', '==', username).get();
-        if (!userSnapshot.empty) {
-          const user = userSnapshot.docs[0].data();
+// FETCH USERNAME PROFILE
+useEffect(() => {
+  const fetchUserImage = async () => {
+    try {
+      const username = item.username;
+      const userRef = db.collection('users').where('username', '==', username);
+      
+      const unsubscribe = userRef.onSnapshot(snapshot => {
+        if (!snapshot.empty) {
+          const user = snapshot.docs[0].data();
           setFirebaseImageUrl(user.img || null);
         } else {
           setFirebaseImageUrl(null);
         }
-      } catch (error) {
-        console.error('Error fetching user image:', error);
-      }
-    };
+      });
+      
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Error fetching user image:', error);
+    }
+  };
 
-    fetchUserImage();
-  }, [item.username]);
+  fetchUserImage();
+}, [item.username]);
+
 
   
     const [user, setUser] = useState(null);
@@ -88,29 +97,6 @@ const CounselorPostDesign = ({ item }) => {
     });
     return unsubscribe;
     }, []);
-
-    useEffect(() => {
-    const fetchPfp = async (uid) => {
-        try {
-        const userRef = firebase.firestore().collection('users').doc(uid);
-        const unsubscribe = userRef.onSnapshot((doc) => {
-            const pfpURL = doc.data().img;
-            if (pfpURL) {
-            setFirebaseImageUrl(pfpURL);
-            } else {
-            setFirebaseImageUrl(null);
-            }
-        });
-        return () => unsubscribe();
-        } catch (error) {
-        console.error(error);
-        }
-    };
-
-    if (user) {
-        fetchPfp(user.uid);
-    }
-    }, [user]);
 
     const [modalVisible, setModalVisible] = useState(false);
 

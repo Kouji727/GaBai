@@ -27,8 +27,6 @@ const SignIn = () => {
             headerTintColor: '#8a344c'
           }}
         />
-
-        <Stack.Screen name="CreatePost" component={CreatePost} />
       </Stack.Navigator>
     </NavigationContainer>
   );

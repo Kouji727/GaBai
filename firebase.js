@@ -18,17 +18,22 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-export const getPosts = () => {
-    return db.collection('threads')
-        .get()
-        .then(result => result.docs)
-        .then(docs => docs.map(doc => ({
-            id: doc.id,
-            username: doc.data().username,
-            content: doc.data().content,
-            createdAt: doc.data().createdAt.toDate().toLocaleString()
-        })))
-    }
+export const getPosts = async () => {
+  try {
+      const result = await db.collection('threads').get();
+      const posts = result.docs.map(doc => ({
+          id: doc.id,
+          username: doc.data().username,
+          content: doc.data().content,
+          createdAt: doc.data().createdAt.toDate().toLocaleString()
+      }));
+      return posts;
+  } catch (error) {
+      console.log(error);
+      throw error;
+  }
+}
+
 
 export const streamPosts = (observer) => {
     db.collection('threads').onSnapshot(observer)
@@ -67,8 +72,10 @@ export const useProfilePicture = () => {
     };
 
     if (user) {
+
         fetchPfp(user.uid);
     }
+
     }, [user]);
 
     return firebaseImageUrl;
@@ -110,7 +117,6 @@ export const getThreadPicture = () => {
   
     return firebaseImageUrl;
   };
-
 
 const auth = firebase.auth();
 const db = firebase.firestore();

@@ -30,6 +30,7 @@ const CreatePost = ({ cancel, closeAfter }) => {
           setUserData(userDoc.data());
         }
       };
+
       fetchUserData();
   
       const unsubscribe = db.collection('users').doc(auth.currentUser?.uid)
@@ -42,33 +43,36 @@ const CreatePost = ({ cancel, closeAfter }) => {
       return () => unsubscribe();
     }, []);
 
-    const uploadImagesToFirebase = async (imageUri) => {
-        try {
-            const { uri } = await FileSystem.getInfoAsync(imageUri);
-            const blob = await new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.onload = () => {
-                    resolve(xhr.response);
-                };
-                xhr.onerror = (e) => {
-                    reject(new TypeError('Network request failed'));
-                };
-                xhr.responseType = 'blob';
-                xhr.open('GET', uri, true);
-                xhr.send(null);
-            });
-    
-            const filename = imageUri.substring(imageUri.lastIndexOf('/') + 1);
-            const name = filename.split('.')[0]; // remove file extension
-            const ref = firebase.storage().ref().child(name);
-
-            await ref.put(blob);
-            
-        } catch (error) {
-            console.error(error);
-            throw error;
-        }
-    };
+    const uploadImagesToFirebase = async (selectedImage) => {
+      try {
+          const { uri } = await FileSystem.getInfoAsync(selectedImage);
+          const blob = await new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhr.onload = () => {
+                  resolve(xhr.response);
+              };
+              xhr.onerror = (e) => {
+                  reject(new TypeError('Network request failed'));
+              };
+              xhr.responseType = 'blob';
+              xhr.open('GET', uri, true);
+              xhr.send(null);
+          });
+  
+          const filenameWithExtension = selectedImage.substring(selectedImage.lastIndexOf('/') + 1);
+          const filename = filenameWithExtension.split('.').slice(0, -1).join('.'); // Remove extension
+          const ref = firebase.storage().ref().child(filename);
+  
+          await ref.put(blob);
+          const downloadUrl = await ref.getDownloadURL(); // Get the download URL of the uploaded image
+  
+          return downloadUrl; // Return the download URL
+      } catch (error) {
+          console.error(error);
+          throw error;
+      }
+  };
+  
     
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -94,27 +98,30 @@ const CreatePost = ({ cancel, closeAfter }) => {
     };
 
     const handleSubmit = async (values) => {
-        try {
-            let imageUrl = null;
-            if (selectedImage) {
-                setLoading(true); // Start loading
-                imageUrl = await uploadImagesToFirebase(selectedImage);
-                setTimeout(() => setLoading(false), 3000); // Stop loading after 3 seconds
-            }
-    
-            db.collection('threads').add({
-                username: userData?.username || 'Anonymous',
-                content: values.content,
-                createdAt: new Date(),
-                image: imageUrl ? { img: imageUrl } : null
-            }).then(result => {
-                console.log("Post created successfully");
-                closeAfter();
-            }).catch(err => console.log(err));
-        } catch (error) {
-            console.error("Error creating post: ", error);
-        }
-    };
+      try {
+          let imageUrl = null;
+          if (selectedImage) {
+              setLoading(true); // Start loading
+              imageUrl = await uploadImagesToFirebase(selectedImage);
+              setTimeout(() => setLoading(false), 3000); // Stop loading after 3 seconds
+          }
+  
+          db.collection('threads').add({
+              username: userData?.username || 'Anonymous',
+              content: values.content,
+              createdAt: new Date(),
+              like: 0,
+              comment: 0,
+              image: imageUrl ? { img: imageUrl } : null
+          }).then(result => {
+              console.log("Post created successfully");
+              closeAfter();
+          }).catch(err => console.log(err));
+      } catch (error) {
+          console.error("Error creating post: ", error);
+      }
+  };
+  
 
     return (
 

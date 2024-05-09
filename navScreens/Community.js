@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, TouchableWithoutFeedback, ActivityIndicator, Modal } from 'react-native';
-import {db, streamPosts } from '../firebase';
+import {db, streamPosts, firebase } from '../firebase';
 import { FontAwesome } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -24,22 +24,44 @@ export default function Community() {
 
 
     const mapDocToPost = (document) => {
+        const createdAt = document.data().createdAt.toDate();
+        const formattedDate = createdAt.toLocaleString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+        });
+        
         return {
             id: document.id,
             username: document.data().username,
             content: document.data().content,
-            createdAt: document.data().createdAt.toDate().toLocaleString(),
+            createdAt: document.data().createdAt.toDate().toISOString(),
+            formattedDate: formattedDate, // Add formattedDate here
             like: document.data().like,
             comment: document.data().comment,
-        }
-    }
-
-    useEffect( () => {
+        };
+    };
+    
+    
+    
+    useEffect(() => {
         const unsubscribe = streamPosts({
             next: querySnapshot => {
-                const threads = querySnapshot
-                .docs.map(docSnapshot => mapDocToPost(docSnapshot))
-                setThreads(threads)
+                const threads = querySnapshot.docs.map(docSnapshot => mapDocToPost(docSnapshot));
+                // Sort threads by createdAt date
+                threads.sort((a, b) => {
+                    const dateA = new Date(a.createdAt);
+                    const dateB = new Date(b.createdAt);
+                    if (isNaN(dateA) || isNaN(dateB)) {
+                        return 0;
+                    }
+                    return dateB - dateA;
+                });
+                setThreads(threads);
                 setLoading(false);
             },
             error: (error) => {
@@ -47,9 +69,15 @@ export default function Community() {
                 setLoading(false);
             }
         });
-
-        return unsubscribe
-    }, [setThreads])
+    
+        return unsubscribe;
+    }, []);
+    
+    
+    
+    
+    
+    
 
 
 
@@ -81,7 +109,7 @@ export default function Community() {
                         </View>
                     ) : (
                         <>
-                            {threads?.map(thread => <CounselorPostDesign key={thread.id} item={thread} />)}
+                            {threads?.map(thread => <CounselorPostDesign key={thread.id} item={{...thread, createdAt: thread.formattedDate}} />)}
                         </>
                         
                     )}

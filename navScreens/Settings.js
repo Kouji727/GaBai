@@ -210,7 +210,7 @@ export default function Settings() {
                         {deleting && (
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="large" color="#8a344c" />
-                                <Text style={styles.uploadingText}>Deleting Previous Picture...</Text>
+                                <Text style={styles.uploadingText}>Replacing Previous Picture...</Text>
                             </View>
                         )}
                         <View style={styles.threeButtons}>
