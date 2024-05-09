@@ -1,124 +1,126 @@
-import React,  {useEffect}  from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TouchableHighlight } from 'react-native'
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TouchableHighlight } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
+import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { db, auth, firebase } from '../firebase';
 import EditPostCounselor from './editPostCounselor';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
 
 const CounselorPostDesign = ({ item }) => {
-
+    const [isHeartSolid, setIsHeartSolid] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
-
-    useEffect(() => {
-      const fetchUserData = async () => {
-          const userDoc = await db.collection('users').doc(auth.currentUser?.uid).get();
-          if (userDoc.exists) {
-              setCurrentUser(userDoc.data());
-          }
-      };
-      fetchUserData();
-  
-      const unsubscribe = db.collection('users').doc(auth.currentUser?.uid)
-          .onSnapshot((doc) => {
-              if (doc.exists) {
-                  setCurrentUser(doc.data());
-              }
-          });
-  
-      return () => unsubscribe();
-  }, []);
-
-    
-    
-  const [firebaseImageUrlProfile, setFirebaseImageUrlProfile] = useState(null);
-  const [firebaseImageUrlp, setFirebaseImageUrlp] = useState(null);
-  const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
-
-
-  //FETCH THE CONTENT IMAGE
-  useEffect(() => {
-    const fetchThreadImage = async () => {
-      try {
-        const threadSnapshot = await db.collection('threads').doc(item.id).get();
-        if (threadSnapshot.exists) {
-          const threadData = threadSnapshot.data();
-          if (threadData.image && threadData.image.img) {
-            setFirebaseImageUrlp(threadData.image.img);
-          } else {
-            setFirebaseImageUrlp(null);
-          }
-        } else {
-          setFirebaseImageUrlp(null);
-        }
-      } catch (error) {
-        console.error('Error fetching thread image:', error);
-      }
-    };
-  
-    fetchThreadImage();
-  }, [item.id]);
-  
-// FETCH USERNAME PROFILE
-useEffect(() => {
-  const fetchUserImage = async () => {
-    try {
-      const username = item.username;
-      const userRef = db.collection('users').where('username', '==', username);
-      
-      const unsubscribe = userRef.onSnapshot(snapshot => {
-        if (!snapshot.empty) {
-          const user = snapshot.docs[0].data();
-          setFirebaseImageUrl(user.img || null);
-        } else {
-          setFirebaseImageUrl(null);
-        }
-      });
-      
-      return () => unsubscribe();
-    } catch (error) {
-      console.error('Error fetching user image:', error);
-    }
-  };
-
-  fetchUserImage();
-}, [item.username]);
-
-
-  
+    const [firebaseImageUrlp, setFirebaseImageUrlp] = useState(null);
+    const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalImgVisible, setModalImgVisible] = useState(false);
     const [user, setUser] = useState(null);
+    const [isLiked, setIsLiked] = useState(false);
+    const [currentUserLiked, setCurrentUserLiked] = useState(false);
 
+    // Set current user by targeting UID in the users collection
     useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-        setUser(user);
-    });
-    return unsubscribe;
+        const fetchUserData = async () => {
+            const userDoc = await db.collection('users').doc(auth.currentUser?.uid).get();
+            if (userDoc.exists) {
+                setCurrentUser(userDoc.data());
+            }
+        };
+
+        fetchUserData();
+
+        const unsubscribe = db.collection('users').doc(auth.currentUser?.uid)
+            .onSnapshot((doc) => {
+                if (doc.exists) {
+                    setCurrentUser(doc.data());
+                }
+            });
+
+        return () => unsubscribe();
     }, []);
 
-    const [modalVisible, setModalVisible] = useState(false);
+    // Fetch the content image
+    useEffect(() => {
+        const fetchThreadImage = async () => {
+            try {
+                const threadSnapshot = await db.collection('threads').doc(item.id).get();
+                if (threadSnapshot.exists) {
+                    const threadData = threadSnapshot.data();
+                    if (threadData.image && threadData.image.img) {
+                        setFirebaseImageUrlp(threadData.image.img);
+                    } else {
+                        setFirebaseImageUrlp(null);
+                    }
+                } else {
+                    setFirebaseImageUrlp(null);
+                }
+            } catch (error) {
+                console.error('Error fetching thread image:', error);
+            }
+        };
+
+        fetchThreadImage();
+    }, [item.id]);
+
+    // Fetch username profile pic
+    useEffect(() => {
+        const fetchUserImage = async () => {
+            try {
+                if (item.username) {
+                    const username = item.username;
+                    const userRef = db.collection('users').where('username', '==', username);
+
+                    const unsubscribe = userRef.onSnapshot(snapshot => {
+                        if (!snapshot.empty) {
+                            const user = snapshot.docs[0].data();
+                            setFirebaseImageUrl(user.img || null);
+                        } else {
+                            setFirebaseImageUrl(null);
+                        }
+                    });
+
+                    return () => unsubscribe();
+                }
+            } catch (error) {
+                console.error('Error fetching user image:', error);
+            }
+        };
+
+        fetchUserImage();
+    }, [item.username]);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            setUser(user);
+        });
+        return unsubscribe;
+    }, []);
+
+    useEffect(() => {
+        const threadRef = db.collection('threads').doc(item.id);
+
+        const unsubscribe = threadRef.onSnapshot(snapshot => {
+            const threadData = snapshot.data();
+            setCurrentUserLiked(threadData.likedBy && threadData.likedBy.includes(currentUser.username));
+            setIsLiked(threadData.likedBy && threadData.likedBy.includes(currentUser.username));
+        });
+
+        return unsubscribe;
+    }, [item.id, currentUser?.username]);
 
     const toggleModal = () => {
         setModalVisible(!modalVisible);
     };
 
-    const [modalImgVisible, setModalImgVisible] = useState(false);
-
     const toggleImgModal = () => {
         setModalImgVisible(!modalImgVisible);
     };
-
-    const submit = () => {
-        toggleModal()
-    }
 
     const editOption = () => {
         toggleModal();
     };
 
-    
     const deleteOption = () => {
         Alert.alert(
             'Delete Post?',
@@ -133,7 +135,7 @@ useEffect(() => {
             { cancelable: true }
         );
     };
-    
+
     const deletePost = async () => {
         try {
             // Get the post image URL
@@ -154,125 +156,139 @@ useEffect(() => {
             console.error('Error deleting post: ', error);
         }
     };
-    
 
-    const [isLiked, setIsLiked] = useState(false);
+    const handleLike = async () => {
+        try {
+            const threadRef = db.collection('threads').doc(item.id);
 
-    const toggleLike = () => {
-        setIsLiked(!isLiked);
+            const threadSnapshot = await threadRef.get();
+            const threadData = threadSnapshot.data();
+
+            const newLikes = currentUserLiked ? threadData.like - 1 : threadData.like + 1;
+
+            const newLikedBy = currentUserLiked ?
+                threadData.likedBy.filter(u => u !== currentUser.username)
+                : [...(threadData.likedBy || []), currentUser.username];
+
+            await threadRef.update({
+                like: newLikes,
+                likedBy: newLikedBy
+            });
+
+            setIsLiked(!isLiked);
+        } catch (error) {
+            console.error('Error updating likes:', error);
+        }
     };
 
     return (
         <View style={styles.allCont}>
-          {/* Modal components */}
-          <Modal 
-            transparent={true} 
-            visible={modalVisible}
-            animationType="slide"
-            onRequestClose={() => {}}>
-            <View style={styles.modalContainer}>
-              <EditPostCounselor item={item} onPress={toggleModal} submit={() => setModalVisible(false)}/>
-            </View>
-          </Modal>
-    
-          <Modal
-            visible={modalImgVisible}
-            transparent={true}
-            animationType="fade">
-            <ImageViewer
-              imageUrls={[{ url: firebaseImageUrlp}]}
-              enableSwipeDown={true}
-              onSwipeDown={toggleImgModal}
-              renderIndicator={() => null}
-              style={styles.modalImage}/>
-    
-            <TouchableOpacity style={styles.closeButton} onPress={toggleImgModal}>
-              <Ionicons name="close-circle" size={34} color="white" />
-            </TouchableOpacity>
-          </Modal>
-    
-          <View style={{margin: 5}}>
-            <View style={styles.profileName}>
-              <View style={styles.topItems}>
-                <View style={styles.pfpCont}>
-                  <TouchableOpacity>
-                    <Image
-                      style={styles.pfp}
-                      resizeMode='cover'
-                      source={firebaseImageUrl ? { uri: firebaseImageUrl } : require('../assets/defaultPfp.jpg')}
-                      onError={(error) => console.error('Image loading error:', error)}
-                    />
-                  </TouchableOpacity>
+            {/* Modal components */}
+            <Modal
+                transparent={true}
+                visible={modalVisible}
+                animationType="slide"
+                onRequestClose={() => { }}>
+                <View style={styles.modalContainer}>
+                    <EditPostCounselor item={item} onPress={toggleModal} submit={() => setModalVisible(false)} />
                 </View>
-                <View style={{flex: 1}}>
-                  <Text style={{fontWeight: 'bold', fontSize: 12, ellipsizeMode: 'tail', numberOfLines: 1}}>
-                    {item.username}
-                  </Text>
-                  <View style={styles.datePosted}>
-                    <Text style={{color: 'grey', fontSize: 12}}>
-                      {item.createdAt}
+            </Modal>
+
+            <Modal
+                visible={modalImgVisible}
+                transparent={true}
+                animationType="fade">
+                <ImageViewer
+                    imageUrls={[{ url: firebaseImageUrlp }]}
+                    enableSwipeDown={true}
+                    onSwipeDown={toggleImgModal}
+                    renderIndicator={() => null}
+                    style={styles.modalImage} />
+
+                <TouchableOpacity style={styles.closeButton} onPress={toggleImgModal}>
+                    <Ionicons name="close-circle" size={34} color="white" />
+                </TouchableOpacity>
+            </Modal>
+
+            <View style={{ margin: 5 }}>
+                <View style={styles.profileName}>
+                    <View style={styles.topItems}>
+                        <View style={styles.pfpCont}>
+                            <TouchableOpacity>
+                                <Image
+                                    style={styles.pfp}
+                                    resizeMode='cover'
+                                    source={firebaseImageUrl ? { uri: firebaseImageUrl } : require('../assets/defaultPfp.jpg')}
+                                    onError={(error) => console.error('Image loading error:', error)}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 12, ellipsizeMode: 'tail', numberOfLines: 1 }}>
+                                {item.username}
+                            </Text>
+                            <View style={styles.datePosted}>
+                                <Text style={{ color: 'grey', fontSize: 12 }}>
+                                    {item.createdAt}
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.settingsIcon}>
+                        {currentUser && currentUser.username === item.username && (
+                            <Menu name={`menu-${item.id}`}>
+                                <MenuTrigger>
+                                    <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
+                                        <Octicons name="kebab-horizontal" size={20} color="black" />
+                                    </View>
+                                </MenuTrigger>
+                                <MenuOptions customStyles={menuStyles}>
+                                    <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
+                                        <Text style={styles.menuItemTextStyle}>Edit</Text>
+                                    </MenuOption>
+                                    <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
+                                        <Text style={styles.menuItemTextStyle}>Delete</Text>
+                                    </MenuOption>
+                                </MenuOptions>
+                            </Menu>
+                        )}
+                    </View>
+                </View>
+
+                <View style={styles.postTitle}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
+                        {item.content}
                     </Text>
-                  </View>
                 </View>
-              </View>
-    
-              <View style={styles.settingsIcon}>
-{currentUser && currentUser.username === item.username && (
-    <Menu name={`menu-${item.id}`}>
-        <MenuTrigger>
-            <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
-                <Octicons name="kebab-horizontal" size={20} color="black" />
-            </View>
-        </MenuTrigger>
-        <MenuOptions customStyles={menuStyles}>
-            <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
-                <Text style={styles.menuItemTextStyle}>Edit</Text>
-            </MenuOption>
-            <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
-                <Text style={styles.menuItemTextStyle}>Delete</Text>
-            </MenuOption>
-        </MenuOptions>
-    </Menu>
-    )}
 
-              </View>
+                {firebaseImageUrlp && (
+                    <View style={styles.postPic}>
+                        <TouchableHighlight style={styles.imageContainer} onPress={toggleImgModal}>
+                            <Image
+                                source={{ uri: firebaseImageUrlp }}
+                                style={styles.image} />
+                        </TouchableHighlight>
+                    </View>
+                )}
+<Text>{item.id}</Text>
+                <View style={styles.lowerButtonCont}>
+                    <TouchableOpacity style={styles.icontainer} onPress={handleLike}>
+                        <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
+                        <Text style={{ fontSize: 12, color: 'grey', marginLeft: 5 }}>{item.like}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.icontainer}>
+                        <FontAwesome6 name="comment-alt" size={24} color="grey" />
+                        <Text style={{ fontSize: 12, color: 'grey', marginLeft: 5 }}>{item.comment}</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-    
-            <View style={styles.postTitle}>
-              <Text style={{fontWeight: 'bold', fontSize: 18}}>
-                {item.content}
-              </Text>
-            </View>
-    
-            {firebaseImageUrlp && (
-        <View style={styles.postPic}>
-            <TouchableHighlight style={styles.imageContainer} onPress={toggleImgModal}>
-            <Image 
-                source={{ uri: firebaseImageUrlp }} 
-                style={styles.image} />
-            </TouchableHighlight>
         </View>
-        )}
+    );
+};
 
-    
-            <View style={styles.lowerButtonCont}> 
-              <TouchableOpacity style={styles.icontainer} onPress={toggleLike}>
-                <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
-                <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}>{item.like}</Text>
-              </TouchableOpacity>
-    
-              <TouchableOpacity style={styles.icontainer}>
-                <FontAwesome6 name="comment-alt" size={24} color="grey"/>
-                <Text style={{fontSize: 12, color: 'grey', marginLeft: 5}}>{item.comment}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      );
-    }
-
-export default CounselorPostDesign
-
+export default CounselorPostDesign;
 
 const styles = StyleSheet.create({
 
@@ -282,7 +298,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    
+
     modalRemoveButton: {
         width: '15%',
         aspectRatio: 1, // To make it a square
@@ -315,8 +331,6 @@ const styles = StyleSheet.create({
         borderBottomColor: '#E2AFBF',
         borderBottomWidth: 1,
         padding: 5,
-
-
     },
 
     profileName: {
@@ -332,7 +346,6 @@ const styles = StyleSheet.create({
     topItems: {
         flexDirection: 'row',
         alignItems: 'center',
-
     },
 
     pfp: {
@@ -370,14 +383,12 @@ const styles = StyleSheet.create({
 
     postPic: {
         marginTop: 10,
-        
     },
 
     imageContainer: {
         elevation: 3,
         shadowColor: 'black',
         borderRadius: 15,
-        
     },
 
     image: {
@@ -398,8 +409,6 @@ const styles = StyleSheet.create({
         top: 20,
         right: 20,
     },
-
-
 });
 
 const menuStyles = {
