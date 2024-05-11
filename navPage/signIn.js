@@ -6,7 +6,7 @@ import LoginPage from '../screens/login';
 import MainScreen from './mainscreen';
 import CreatePost from '../documents/CreatePost';
 import Settings from '../navScreens/Settings';
-
+import ThreadCommentPage from '../components/ThreadCommentPage';
 const Stack = createNativeStackNavigator();
 
 const SignIn = () => {
@@ -26,6 +26,18 @@ const SignIn = () => {
             headerStyle: { backgroundColor: 'pink' },
             headerTintColor: '#8a344c'
           }}
+          
+        />
+
+        <Stack.Screen
+          name="View Post"
+          component={ThreadCommentPage}
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: 'pink' },
+            headerTintColor: '#8a344c'
+          }}
+          
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -13,6 +13,30 @@ const UserPostDesign = ({ item }) => {
     const [userUID, setUserUID] = useState(null);
     const [hideSettingsIcon, setHideSettingsIcon] = useState(true);
     const [isLiked, setIsLiked] = useState(false);
+    const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
+
+    useEffect(() => {
+        const fetchUserImage = async () => {
+            try {
+                if (item.username) {
+                    const username = item.username;
+                    const userRef = db.collection('users').where('username', '==', username);
+
+                    const snapshot = await userRef.get();
+                    if (!snapshot.empty) {
+                        const user = snapshot.docs[0].data();
+                        setFirebaseImageUrl(user.img || null);
+                    } else {
+                        setFirebaseImageUrl(null);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user image:', error);
+            }
+        };
+
+        fetchUserImage();
+    }, [item.username]);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -91,10 +115,6 @@ const UserPostDesign = ({ item }) => {
         }
     };
 
-    const toggleLike = () => {
-        setIsLiked(!isLiked);
-    };
-
     return (
         <View style={styles.allCont}>
             <Modal transparent={true} visible={modalVisible} animationType="slide" onRequestClose={() => {}}>
@@ -108,11 +128,12 @@ const UserPostDesign = ({ item }) => {
                     <View style={styles.topItems}>
                         <View style={styles.pfpCont}>
                             <TouchableOpacity>
-                                <Image
-                                    source={require('../assets/defaultPfp.jpg')}
-                                    style={styles.pfp}
-                                    resizeMode="cover"
-                                />
+                                        <Image
+                                            style={styles.pfp}
+                                            resizeMode='cover'
+                                            source={firebaseImageUrl ? { uri: firebaseImageUrl } : require('../assets/defaultPfp.jpg')}
+                                            onError={(error) => console.error('Image loading error:', error)}
+                                        />
                             </TouchableOpacity>
                         </View>
 
@@ -153,17 +174,6 @@ const UserPostDesign = ({ item }) => {
                     <Text style={{ fontWeight: 'bold', fontSize: 18 }}>{item.content}</Text>
                 </View>
 
-                <View style={styles.lowerButtonCont}>
-                    <TouchableOpacity style={styles.icontainer} onPress={toggleLike}>
-                        <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
-                        <Text style={{ fontSize: 12, color: 'grey', marginLeft: 5 }}></Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.icontainer}>
-                        <FontAwesome6 name="comment-alt" size={24} color="grey" />
-                        <Text style={{ fontSize: 12, color: 'grey', marginLeft: 5 }}></Text>
-                    </TouchableOpacity>
-                </View>
             </View>
         </View>
     );

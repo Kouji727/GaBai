@@ -86,7 +86,7 @@ export default function Community() {
     };
 
     return (
-        <MenuProvider>
+        <MenuProvider skipInstanceCheck>
             <ScrollView
             style={styles.container}
             showsVerticalScrollIndicator = {false}>

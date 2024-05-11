@@ -103,9 +103,9 @@ const CreatePost = ({ cancel, closeAfter }) => {
           if (selectedImage) {
               setLoading(true); // Start loading
               imageUrl = await uploadImagesToFirebase(selectedImage);
-              setTimeout(() => setLoading(false), 3000); // Stop loading after 3 seconds
           }
-  
+
+          setLoading(true); // Start loading
           db.collection('threads').add({
               username: userData?.username || 'Anonymous',
               content: values.content,
@@ -114,8 +114,10 @@ const CreatePost = ({ cancel, closeAfter }) => {
               comment: 0,
               image: imageUrl ? { img: imageUrl } : null
           }).then(result => {
-              console.log("Post created successfully");
+            setLoading(false)
               closeAfter();
+              console.log("Post created successfully");
+
           }).catch(err => console.log(err));
       } catch (error) {
           console.error("Error creating post: ", error);

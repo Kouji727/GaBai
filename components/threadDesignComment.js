@@ -5,14 +5,21 @@ import { FontAwesome6 } from '@expo/vector-icons';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { db, auth, firebase } from '../firebase';
 import EditPostCounselor from './editPostCounselor';
-import ThreadDesignComment from './threadDesignComment';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 
+//NOT USED
+//NOT USED
+//NOT USED
+//NOT USED
+//NOT USED
+//NOT USED
+//NOT USED
+//NOT USED
 
-const CounselorPostDesign = ({ item }) => {
+const ThreadDesignComment = ({ item, onPress }) => {
     const navigation = useNavigation();
     const [currentUser, setCurrentUser] = useState(null);
     const [firebaseImageUrlp, setFirebaseImageUrlp] = useState(null);
@@ -117,8 +124,7 @@ const CounselorPostDesign = ({ item }) => {
     };
 
     const toggleCommentModal = () => {
-            navigation.navigate('View Post', { item });
-        //setModalCommentVisible(!modalCommentVisible);
+        setModalCommentVisible(false);
     };
 
     const toggleImgModal = () => {
@@ -189,135 +195,152 @@ const CounselorPostDesign = ({ item }) => {
         }
     };
 
-
-    const handleComment = () => {
-        navigation.navigate('Comment', { postId: item.id });
-    }
-    
-
     return (
-        <View style={styles.allCont}>
-            {/* Modal components */}
-            <Modal
-                transparent={true}
-                visible={modalVisible}
-                animationType="fade"
-                onRequestClose={() => { }}>
-                <View style={styles.modalContainer}>
-                    <EditPostCounselor item={item} onPress={toggleModal} submit={() => setModalVisible(false)} />
-                </View>
-            </Modal>
+        <View style={styles.foHeader}>
 
-            <Modal
-                visible={modalImgVisible}
-                transparent={true}
-                animationType="fade">
-                <ImageViewer
-                    imageUrls={[{ url: firebaseImageUrlp }]}
-                    enableSwipeDown={true}
-                    onSwipeDown={toggleImgModal}
-                    renderIndicator={() => null}
-                    style={styles.modalImage} />
-
-                <TouchableOpacity style={styles.closeButton} onPress={toggleImgModal}>
-                    <Ionicons name="close-circle" size={34} color="white" />
+            <View style={styles.header}>
+                <TouchableOpacity onPress={onPress}>
+                    <Ionicons name="arrow-back" size={24} color="#8a344c" />
                 </TouchableOpacity>
-            </Modal>
-
-            <Modal
-                transparent={false}
-                visible={modalCommentVisible}
-                animationType="slide"
-                onRequestClose={() => { }}>
-                <View style={styles.modalCommentContainer}>
-                    <ThreadDesignComment item={item} onPress={toggleCommentModal}/>
-                </View>
-            </Modal>
-
-            <View style={{ margin: 5 }}>
-                <View style={styles.profileName}>
-                    <View style={styles.topItems}>
-                        <View style={styles.pfpCont}>
-                            <View>
-                                <Image
-                                    style={styles.pfp}
-                                    resizeMode='cover'
-                                    source={firebaseImageUrl ? { uri: firebaseImageUrl } : require('../assets/defaultPfp.jpg')}
-                                    onError={(error) => console.error('Image loading error:', error)}
-                                />
-                            </View>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ fontWeight: 'bold', fontSize: 12, ellipsizeMode: 'tail', numberOfLines: 1 }}>
-                                {item.username}
-                            </Text>
-                            <View style={styles.datePosted}>
-                                <Text style={{ color: 'grey', fontSize: 12 }}>
-                                    {item.createdAt}
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={styles.settingsIcon}>
-                        {currentUser && currentUser.username === item.username && (
-                            <Menu name={`menu-${item.id}`}>
-                                <MenuTrigger>
-                                    <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
-                                        <Octicons name="kebab-horizontal" size={20} color="black" />
-                                    </View>
-                                </MenuTrigger>
-
-                                <MenuOptions customStyles={menuStyles}>
-                                    <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
-                                        <Text style={styles.menuItemTextStyle}>Edit</Text>
-                                    </MenuOption>
-                                    <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
-                                        <Text style={styles.menuItemTextStyle}>Delete</Text>
-                                    </MenuOption>
-                                </MenuOptions>
-                            </Menu>
-                        )}
-                    </View>
-                </View>
-
-                <View style={styles.postTitle}>
-                    <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
-                        {item.content}
-                    </Text>
-                </View>
-
-                {firebaseImageUrlp && (
-                    <View style={styles.postPic}>
-                        <TouchableHighlight style={styles.imageContainer} onPress={toggleImgModal}>
-                            <Image
-                                source={{uri: firebaseImageUrlp}}
-                                style={styles.image} />
-                        </TouchableHighlight>
-                    </View>
-                )}
-
-                {/* DELETE AFTER */}
-                <Text>{item.id}</Text> 
-                <View style={styles.lowerButtonCont}>
-                    <TouchableOpacity style={styles.icontainer} onPress={handleLike}>
-                        <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
-                        <Text style={{ fontSize: 12, color: 'grey', marginLeft: 5 }}>{item.like}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.icontainer} onPress={toggleCommentModal} >
-                        <FontAwesome6 name="comment-alt" size={24} color="grey" />
-                        <Text style={{ fontSize: 12, color: 'grey', marginLeft: 5 }}>{item.comment}</Text>
-                    </TouchableOpacity>
-                </View>
+                <Text style={styles.headerTitle}>View Post</Text>
+                <View style={{ width: 24 }}></View>
             </View>
+
+            <View style={styles.allCont}>
+                {/* Modal components */}
+                <Modal
+                    transparent={true}
+                    visible={modalVisible}
+                    animationType="slide"
+                    onRequestClose={() => { }}>
+                    <View style={styles.modalContainer}>
+                        <EditPostCounselor item={item} onPress={toggleModal} submit={() => setModalVisible(false)} />
+                    </View>
+                </Modal>
+
+                <Modal
+                    visible={modalImgVisible}
+                    transparent={true}
+                    animationType="fade">
+                    <ImageViewer
+                        imageUrls={[{ url: firebaseImageUrlp }]}
+                        enableSwipeDown={true}
+                        onSwipeDown={toggleImgModal}
+                        renderIndicator={() => null}
+                        style={styles.modalImage} />
+
+                    <TouchableOpacity style={styles.closeButton} onPress={toggleImgModal}>
+                        <Ionicons name="close-circle" size={34} color="white" />
+                    </TouchableOpacity>
+                </Modal>
+
+                <View style={{ margin: 5 }}>
+                    <View style={styles.profileName}>
+                        <View style={styles.topItems}>
+                            <View style={styles.pfpCont}>
+                                <View>
+                                    <Image
+                                        style={styles.pfp}
+                                        resizeMode='cover'
+                                        source={firebaseImageUrl ? { uri: firebaseImageUrl } : require('../assets/defaultPfp.jpg')}
+                                        onError={(error) => console.error('Image loading error:', error)}
+                                    />
+                                </View>
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 12, ellipsizeMode: 'tail', numberOfLines: 1 }}>
+                                    {item.username}
+                                </Text>
+                                <View style={styles.datePosted}>
+                                    <Text style={{ color: 'grey', fontSize: 12 }}>
+                                        {item.createdAt}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.settingsIcon}>
+                            {currentUser && currentUser.username === item.username && (
+                                <Menu name={`modal-menu-${item.id}`} skipInstanceCheck={true}>
+                                    <MenuTrigger>
+                                        <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
+                                            <Octicons name="kebab-horizontal" size={20} color="black" />
+                                        </View>
+                                    </MenuTrigger>
+
+                                    <MenuOptions customStyles={menuStyles}>
+                                        <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
+                                            <Text style={styles.menuItemTextStyle}>Edit</Text>
+                                        </MenuOption>
+                                        <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
+                                            <Text style={styles.menuItemTextStyle}>Delete</Text>
+                                        </MenuOption>
+                                    </MenuOptions>
+                                </Menu>
+
+
+                            )}
+                        </View>
+                    </View>
+
+                    <View style={styles.postTitle}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 18 }}>
+                            {item.content}
+                        </Text>
+                    </View>
+
+                    {firebaseImageUrlp && (
+                        <View style={styles.postPic}>
+                            <TouchableHighlight style={styles.imageContainer} onPress={toggleImgModal}>
+                                <Image
+                                    source={{uri: firebaseImageUrlp}}
+                                    style={styles.image} />
+                            </TouchableHighlight>
+                        </View>
+                    )}
+
+                    {/* DELETE AFTER */}
+                    <Text>{item.id}</Text> 
+                    <View style={styles.lowerButtonCont}>
+                        <TouchableOpacity style={styles.icontainer} onPress={handleLike}>
+                            <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
+                            <Text style={{ fontSize: 12, color: 'grey', marginLeft: 5 }}>{item.like}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.icontainer} >
+                            <FontAwesome6 name="comment-alt" size={24} color="grey" />
+                            <Text style={{ fontSize: 12, color: 'grey', marginLeft: 5 }}>{item.comment}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                
+            </View>
+
+
+
+
         </View>
     );
 };
 
-export default CounselorPostDesign;
+export default ThreadDesignComment;
 
 const styles = StyleSheet.create({
+
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: 'pink',
+        paddingHorizontal: 15,
+        paddingVertical: 16
+    },
+
+    headerTitle: {
+        fontSize: 20,
+        color: '#8a344c',
+        fontWeight: '500'
+    },
 
     modalContainer: {
         flex: 1,
@@ -327,7 +350,7 @@ const styles = StyleSheet.create({
 
     modalCommentContainer: {
         flex: 1,
-        backgroundColor: '#F3E8EB',
+        backgroundColor: 'red',
     },
 
     modalRemoveButton: {
@@ -354,6 +377,10 @@ const styles = StyleSheet.create({
         width: '95%',
         flexDirection: 'row',
         justifyContent: 'space-around',
+    },
+
+    foHeader: {
+        
     },
 
     allCont: {
@@ -449,5 +476,9 @@ const menuStyles = {
         backgroundColor: '#F5F5F5',
         padding: 1,
         borderRadius: 10,
+        zIndex: 1000,
     },
+    
+
+
 };
