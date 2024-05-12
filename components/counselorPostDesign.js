@@ -263,7 +263,7 @@ const CounselorPostDesign = ({ item }) => {
                         {currentUser && currentUser.username === item.username && (
                             <Menu name={`menu-${item.id}`}>
                                 <MenuTrigger>
-                                    <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
+                                    <View style={{ width: 40, height: 40, transform: [{ rotate: '90deg' }],  alignItems: 'center', justifyContent: 'center' }}>
                                         <Octicons name="kebab-horizontal" size={20} color="black" />
                                     </View>
                                 </MenuTrigger>
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '95%'
+        width: '93%',
     },
 
     settingsIcon: {

@@ -2,11 +2,17 @@ import React from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInput, TouchableHighlight, ScrollView } from 'react-native'
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
+import { isEnabled } from 'react-native/Libraries/Performance/Systrace';
 
 const EditPostCounselor = ({ item, onPress, submit}) => {
     const [editedTitle, setEditedTitle] = useState(item.content);
     const [firebaseImageUrlp, setFirebaseImageUrlp] = useState(null);
     const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
+    const [buttonEnabled, setButtonEnabled] = useState(false);
+
+    const inappropriateWords = ['tanga', 'gago', 'gaga','putangina', 'tarantado','puke','pepe', 'pokpok', 'shit', 'bullshit',
+    'fuck', 'fck' , 'whore', 'puta', 'tangina' ,'syet', 'tite', 'kupal', 'kantot', 'hindot', 'nigga', 'motherfucker', 'kinginamo', 'taenamo'
+    , 'asshole', 'kike', 'cum', 'pussy']
 
 
 // Fetch the content image
@@ -60,18 +66,35 @@ useEffect(() => {
             fetchUserImage();
         }, [item.username]);
 
-    const handleUpdate = () => {
-        db.collection('threads')
-            .doc(item.id)
-            .update({ content: editedTitle })
-            .then(() => {
-                console.log('Document successfully updated!');
-                submit();
-            })
-            .catch((error) => {
-                console.error('Error updating document: ', error);
-            });
-    };
+        const handleUpdate = () => {
+            setButtonEnabled(true); // Disable the button when the update process starts
+        
+            let isInappropriate = false;
+            const contentLower = editedTitle.toLowerCase();
+            for (const word of inappropriateWords) {
+                if (contentLower.includes(word)) {
+                    isInappropriate = true;
+                    Alert.alert('Inappropriate Content', 'Your post contains inappropriate text.');
+                    return; // Stop further execution
+                }
+            }
+        
+            db.collection('threads')
+                .doc(item.id)
+                .update({ 
+                    content: editedTitle,
+                    isInappropriate: isInappropriate
+                })
+                .then(() => {
+                    console.log('Document successfully updated!');
+                    submit();
+                })
+                .catch((error) => {
+                    console.error('Error updating document: ', error);
+                })
+                
+        };
+        
 
 
 return (
@@ -144,12 +167,12 @@ return (
 
                 <View style={styles.canAndSub}>
 
-                    <TouchableOpacity style={styles.cancelButton} onPress={onPress}>
-                        <Text>Cancel</Text>
+                    <TouchableOpacity style={styles.cancelButton} onPress={onPress} disabled={buttonEnabled}>
+                        <Text style={{color: buttonEnabled ? '#9c9c9c' : 'black'}}>Cancel</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.submitButton} onPress={handleUpdate}>
-                        <Text>Submit</Text>
+                    <TouchableOpacity style={styles.submitButton} onPress={handleUpdate} disabled={buttonEnabled}>
+                        <Text style={{color: buttonEnabled ? '#9c9c9c' : 'black'}}>Submit</Text>
                     </TouchableOpacity>
                     
                     
@@ -216,8 +239,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 
-    settingsIcon: {
-    },
 
     topItems: {
         flexDirection: 'row',

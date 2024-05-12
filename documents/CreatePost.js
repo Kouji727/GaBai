@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, Button, TextInput, View, TouchableOpacity, Image, Modal, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, Button, TextInput, View, TouchableOpacity, Image, Modal, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import { useNavigation } from '@react-navigation/native';
@@ -11,17 +11,22 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
 
 const CreatePost = ({ cancel, closeAfter }) => {
-    const navigation = useNavigation();
   
-    const validationSchema = yup.object().shape({
-      content: yup.string().required(),
-    });
+  const navigation = useNavigation();
   
-    const firebaseImageUrl = useProfilePicture();
-    const [userData, setUserData] = useState(null);
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [image, setImage] = useState(null);
-    const [loading, setLoading] = useState(false); // Loading state
+  const validationSchema = yup.object().shape({
+    content: yup.string().required(),
+  });
+  
+  const firebaseImageUrl = useProfilePicture();
+  const [userData, setUserData] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state
+  
+      const inappropriateWords = ['tanga', 'gago', 'gaga','putangina', 'tarantado','puke','pepe', 'pokpok', 'shit', 'bullshit',
+      'fuck', 'fck' , 'whore', 'puta', 'tangina' ,'syet', 'tite', 'kupal', 'kantot', 'hindot', 'nigga', 'motherfucker', 'kinginamo', 'taenamo'
+    , 'asshole', 'kike', 'cum', 'pussy']
   
     useEffect(() => {
       const fetchUserData = async () => {
@@ -99,30 +104,48 @@ const CreatePost = ({ cancel, closeAfter }) => {
 
     const handleSubmit = async (values) => {
       try {
-          let imageUrl = null;
-          if (selectedImage) {
-              setLoading(true); // Start loading
-              imageUrl = await uploadImagesToFirebase(selectedImage);
-          }
-
+        let imageUrl = null;
+        let isInappropriate = false; // Initialize isInappropriate to false
+    
+        if (selectedImage) {
           setLoading(true); // Start loading
-          db.collection('threads').add({
-              username: userData?.username || 'Anonymous',
-              content: values.content,
-              createdAt: new Date(),
-              like: 0,
-              comment: 0,
-              image: imageUrl ? { img: imageUrl } : null
-          }).then(result => {
-            setLoading(false)
-              closeAfter();
-              console.log("Post created successfully");
+          imageUrl = await uploadImagesToFirebase(selectedImage);
+        }
+    
+        // Check if content contains inappropriate words
+        const contentLower = values.content.toLowerCase();
+        for (const word of inappropriateWords) {
+          if (contentLower.includes(word)) {
+            isInappropriate = true;
+            Alert.alert('Inappropriate Content', 'Your post contains inappropriate text.');
+            break;
+          }
+        }
+    
 
-          }).catch(err => console.log(err));
+          
+
+    
+        setLoading(true); // Start loading
+
+        db.collection('threads').add({
+          username: userData?.username || 'Anonymous',
+          content: values.content,
+          createdAt: new Date(),
+          like: 0,
+          comment: 0,
+          image: imageUrl ? { img: imageUrl } : null,
+          isInappropriate: isInappropriate // Set isInappropriate based on the check
+        }).then(result => {
+          setLoading(false);
+          closeAfter();
+          console.log("Post created successfully");
+        }).catch(err => console.log(err));
       } catch (error) {
-          console.error("Error creating post: ", error);
+        console.error("Error creating post: ", error);
       }
-  };
+    };
+    
   
 
     return (

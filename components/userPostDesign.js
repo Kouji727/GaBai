@@ -7,19 +7,54 @@ import { db, auth } from '../firebase';
 import EditPost from './editPost';
 import { Ionicons } from '@expo/vector-icons';
 
-const UserPostDesign = ({ item }) => {
+const UserPostDesign = ({ item, index, id }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [user, setUser] = useState(null);
     const [userUID, setUserUID] = useState(null);
     const [hideSettingsIcon, setHideSettingsIcon] = useState(true);
     const [isLiked, setIsLiked] = useState(false);
     const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
+    const [showFullContent, setShowFullContent] = useState(false);
+    const [postData, setPostData] = useState(null);
+
+    useEffect(() => {
+        const postRef = db.collection('threads').doc(id);
+    
+        const unsubscribe = postRef.onSnapshot((doc) => {
+            if (doc.exists) {
+                setPostData(doc.data());
+            } else {
+                console.log('No such document!');
+            }
+        });
+    
+        return () => unsubscribe();
+    }, [id]);
+
+
+    const [editedContent, setEditedContent] = useState(item.comments);
+
+    useEffect(() => {
+        const unsubscribe = db.collection('threads').doc(item.id)
+          .onSnapshot((snapshot) => {
+            const threadData = snapshot.data();
+            if (threadData) {
+              const thread = {
+                id: snapshot.id,
+                comments: threadData.comments,
+              };
+              setEditedContent(thread.comments || []);
+            }
+          });
+      
+        return () => unsubscribe();
+      }, [item.id]);
 
     useEffect(() => {
         const fetchUserImage = async () => {
             try {
-                if (item.username) {
-                    const username = item.username;
+                if (item.commentedBy) {
+                    const username = item.commentedBy;
                     const userRef = db.collection('users').where('username', '==', username);
 
                     const snapshot = await userRef.get();
@@ -36,12 +71,12 @@ const UserPostDesign = ({ item }) => {
         };
 
         fetchUserImage();
-    }, [item.username]);
+    }, [item.commentedBy]);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const userDoc = await db.collection('threads').where('username', '==', item.username).get();
+                const userDoc = await db.collection('threads').where('username', '==', item.commentedBy).get();
                 if (!userDoc.empty) {
                     userDoc.forEach((doc) => {
                         setUser(doc.data());
@@ -52,8 +87,10 @@ const UserPostDesign = ({ item }) => {
             }
         };
         fetchUser();
-    }, [item.username]);
+    }, [item.commentedBy]);
 
+
+    //gets all info about auth.uid which is current user
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -108,72 +145,86 @@ const UserPostDesign = ({ item }) => {
 
     const deletePost = async () => {
         try {
-            await db.collection('threads').doc(item.id).delete();
+            const updatedComments = postData.comments.filter((comment, i) => i !== index);
+            const newCommentCount = postData.comment - 1;
+            await db.collection('threads').doc(id).update({
+                comments: updatedComments,
+                comment: newCommentCount
+            });
             console.log('Post deleted successfully!');
         } catch (error) {
             console.error('Error deleting post: ', error);
         }
+    };
+    
+    
+
+    const toggleContent = () => {
+        setShowFullContent(!showFullContent);
     };
 
     return (
         <View style={styles.allCont}>
             <Modal transparent={true} visible={modalVisible} animationType="slide" onRequestClose={() => {}}>
                 <View style={styles.modalContainer}>
-                    <EditPost item={item} onPress={toggleModal} submit={() => setModalVisible(false)} />
+                    <EditPost item={item} index={index} id={id} onPress={toggleModal} submit={() => setModalVisible(false)} />
                 </View>
             </Modal>
 
-            <View style={{ margin: 5 }}>
+            <View style={{ marginHorizontal: 5 }}>
                 <View style={styles.profileName}>
                     <View style={styles.topItems}>
                         <View style={styles.pfpCont}>
-                            <TouchableOpacity>
-                                        <Image
-                                            style={styles.pfp}
-                                            resizeMode='cover'
-                                            source={firebaseImageUrl ? { uri: firebaseImageUrl } : require('../assets/defaultPfp.jpg')}
-                                            onError={(error) => console.error('Image loading error:', error)}
-                                        />
-                            </TouchableOpacity>
+                            <View>
+                                <Image
+                                    style={styles.pfp}
+                                    resizeMode='cover'
+                                    source={firebaseImageUrl ? { uri: firebaseImageUrl } : require('../assets/defaultPfp.jpg')}
+                                    onError={(error) => console.error('Image loading error:', error)}
+                                />
+                            </View>
                         </View>
 
-                        <View style={styles.name}>
-                            <Text style={{ fontWeight: 'bold', fontSize: 12 }}>{user ? user.username : 'Loading...'}</Text>
+                        <View style={styles.nameAndCont}>
+                            <View style={styles.name}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 12 }}>{item.commentedBy}</Text>
+                            </View>
+
+                            <View style={styles.postTitle}>
+                                <Text style={{ fontSize: 12 }}>{showFullContent ? item.content : `${item.content.length > 100 ? item.content.substring(0, 100) + '...' : item.content}`}
+                                    {item.content.length > 100 && (
+                                            <Text style={styles.seeMoreButton} onPress={toggleContent}>{showFullContent ? '  Hide' : 'See More'}</Text>
+                                    )}
+                                </Text>
+                            </View>
+
+
                         </View>
 
-                        <View style={styles.datePosted}>
-                            <Text style={{ color: 'grey', fontSize: 12 }}>{item.createdAt}</Text>
-                        </View>
+                        {/* Conditionally render the settings icon */}
+                        {!hideSettingsIcon && (
+                            <View style={styles.settingsIcon}>
+                                <Menu>
+                                    <MenuTrigger>
+                                        <View style={{alignItems: 'center', justifyContent: 'center', width: 25, height: 25, transform: [{ rotate: '90deg' }] }}>
+                                            <Octicons name="kebab-horizontal" size={15} color="black" />
+                                        </View>
+                                    </MenuTrigger>
+
+                                    <MenuOptions customStyles={menuStyles}>
+                                        <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
+                                            <Text style={styles.menuItemTextStyle}>Edit</Text>
+                                        </MenuOption>
+
+                                        <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
+                                            <Text style={styles.menuItemTextStyle}>Delete</Text>
+                                        </MenuOption>
+                                    </MenuOptions>
+                                </Menu>
+                            </View>
+                        )}
                     </View>
-
-                    {/* Conditionally render the settings icon */}
-                    {!hideSettingsIcon && (
-                        <View style={styles.settingsIcon}>
-                            <Menu>
-                                <MenuTrigger>
-                                    <View style={{ width: 20, height: 20, transform: [{ rotate: '90deg' }] }}>
-                                        <Octicons name="kebab-horizontal" size={20} color="black" />
-                                    </View>
-                                </MenuTrigger>
-
-                                <MenuOptions customStyles={menuStyles}>
-                                    <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
-                                        <Text style={styles.menuItemTextStyle}>Edit</Text>
-                                    </MenuOption>
-
-                                    <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
-                                        <Text style={styles.menuItemTextStyle}>Delete</Text>
-                                    </MenuOption>
-                                </MenuOptions>
-                            </Menu>
-                        </View>
-                    )}
                 </View>
-
-                <View style={styles.postTitle}>
-                    <Text style={{ fontWeight: 'bold', fontSize: 18 }}>{item.content}</Text>
-                </View>
-
             </View>
         </View>
     );
@@ -197,6 +248,7 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         marginTop: 10,
     },
+    
     modalEditButton: {
         width: '25%',
         height: 35,
@@ -206,17 +258,10 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         marginTop: 10,
     },
-    twoButtonsBelow: {
-        width: '95%',
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        backgroundColor: 'red',
-    },
+
     allCont: {
         alignSelf: 'center',
         width: '95%',
-        borderBottomColor: '#E2AFBF',
-        borderBottomWidth: 1,
         padding: 5,
 
     },
@@ -225,11 +270,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
-    settingsIcon: {},
+    settingsIcon: {
+        padding: 10,
+    },
+
     topItems: {
         flexDirection: 'row',
         alignItems: 'center',
     },
+
     pfp: {
         height: 35,
         borderRadius: 100,
@@ -240,7 +289,7 @@ const styles = StyleSheet.create({
         marginRight: 5,
     },
     postTitle: {
-        marginTop: 5,
+        marginTop: 0,
     },
     lowerButtonCont: {
         flexDirection: 'row',
@@ -257,6 +306,18 @@ const styles = StyleSheet.create({
     menuItemTextStyle: {
         fontSize: 16,
     },
+    seeMoreButton: {
+        color: '#8a344c',
+        fontWeight: 'bold',
+        fontSize: 12,
+    },
+    nameAndCont: {
+        backgroundColor: '#e8d1d7',
+        borderRadius: 5,
+        padding: 8,
+        paddingVertical: 5,
+        maxWidth: '87%'
+    }
 });
 
 const menuStyles = {
