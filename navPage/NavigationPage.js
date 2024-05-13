@@ -12,6 +12,7 @@ import Inspo from '../navScreens/Inspo';
 import Schedule from '../navScreens/Schedule';
 import Home from '../navScreens/Home';
 import { TouchableOpacity } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 
 
@@ -58,17 +59,17 @@ const NavigationPage = () => {
             // You can return any component that you like here!
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: '#8a344c',
-          tabBarInactiveTintColor: '#b46279',
+          tabBarActiveTintColor: '#BA5255',
+          tabBarInactiveTintColor: '#BA5255',
           headerTitleAlign: 'center',
-          headerTintColor: '#8a344c',
+          headerTintColor: 'white',
           headerStyle: {
-          backgroundColor: 'pink'
+          backgroundColor: '#BA5255'
         },
           headerRight: () => {
             return (
               <TouchableOpacity style={styles.profileButton}>
-                <FontAwesome name="user-circle-o" size={30} color="#8a344c" onPress={() => navigation.dispatch(DrawerActions.openDrawer())}/>
+                <FontAwesome5 name="user-circle" size={30} color="#e8dada" onPress={() => navigation.dispatch(DrawerActions.openDrawer())}/>
               </TouchableOpacity>
             );
           }

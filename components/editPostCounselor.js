@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
         width: '95%',
         
         padding: 5,
-        backgroundColor: '#F3E8EB',
+        backgroundColor: '#e8dada',
         borderRadius: 15,
         paddingTop: 15,
 
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     },
 
     borderBottom: {
-        borderBottomColor: '#E2AFBF',
+        borderBottomColor: '#c4787a',
         borderBottomWidth: 1,
     },
 

@@ -82,7 +82,9 @@ export default function Schedule() {
                 id: doc.id,
                 ...doc.data(),
                 start: new Date(doc.data().start),
-                end: new Date(doc.data().end)
+                end: new Date(doc.data().end),
+                username: doc.data().username,
+                counselor: doc.data().counselor
             }));
             setSchedules(scheduleData);
         });
@@ -146,7 +148,7 @@ export default function Schedule() {
                     setSelectedDate(day.dateString);
                     console.log('selected day', day);
                 }}
-                markedDates={{ ...markedDates, [selectedDate]: { selected: true, selectedColor: 'red' } }}
+                markedDates={{ ...markedDates, [selectedDate]: { selected: true, selectedColor: '#BA5255' } }}
                 renderMarking={renderMarking}
             />
 
@@ -203,7 +205,7 @@ const styles = StyleSheet.create({
     },
 
     scheduleContainer: {
-        backgroundColor: 'pink',
+        backgroundColor: '#e8dada',
         padding: 10,
         borderRadius: 10,
         width: '75%'

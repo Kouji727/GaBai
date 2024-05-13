@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: '#F3E8EB'
+    backgroundColor: '#f5eded'
   },
 
   content: {
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFDFDB'
+    backgroundColor: 'pink'
   },
 
   fSpaceText: {

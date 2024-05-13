@@ -118,7 +118,7 @@ export default LoginPage;
 const styles = StyleSheet.create({
   containerMain: {
     flex: 1,
-    backgroundColor: '#edd9df',
+    backgroundColor: '#e8dada',
   },
   container: {
     flex: 1,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   signInText: {
     fontSize: 35,
     fontWeight: 'bold',
-    color: '#8a344c'
+    color: '#BA5255'
   },
   loginCont: {
     backgroundColor: 'white',
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 5,
-    backgroundColor: '#8a344c',
+    backgroundColor: '#BA5255',
     marginTop: 20,
   },
   logo: {
@@ -160,6 +160,6 @@ const styles = StyleSheet.create({
   textTest: {
     fontWeight: 'bold',
     marginTop: 15,
-    color: '#8a344c'
+    color: '#BA5255'
   }
 });

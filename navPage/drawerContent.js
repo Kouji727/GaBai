@@ -56,7 +56,7 @@ function DrawerContent(props) {
 
     return (
       <DrawerItem
-        icon={() => <Ionicons name={icon} color='#8a344c' size={24} />}
+        icon={() => <Ionicons name={icon} color='#BA5255' size={24} />}
         label={label}
         onPress={() => {
           navigation.navigate(navigateTo);
@@ -91,7 +91,7 @@ function DrawerContent(props) {
   const imgUri = Image.resolveAssetSource(img).uri;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#edd9df' }}>
+    <View style={{ flex: 1, backgroundColor: '#e8dada' }}>
       <DrawerContentScrollView {...props}>
 
         <View style={styles.drawerContent}>
@@ -127,7 +127,7 @@ function DrawerContent(props) {
       <View style={styles.bottomDrawerSection}>
         <DrawerItem
           icon={() => (
-            <Ionicons name="exit" color='#8a344c' size={24} />
+            <Ionicons name="exit" color='#BA5255' size={24} />
           )}
           label="Sign Out"
           onPress={handleSignOut}

@@ -307,12 +307,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     seeMoreButton: {
-        color: '#8a344c',
+        color: '#BA5255',
         fontWeight: 'bold',
         fontSize: 12,
     },
     nameAndCont: {
-        backgroundColor: '#e8d1d7',
+        backgroundColor: '#e8dada',
         borderRadius: 5,
         padding: 8,
         paddingVertical: 5,

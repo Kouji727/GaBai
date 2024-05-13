@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     allCont: {
         alignSelf: 'center',
         width: '95%',
-        borderBottomColor: '#E2AFBF',
+        borderBottomColor: '#c4787a',
         borderBottomWidth: 1,
         padding: 5,
     },

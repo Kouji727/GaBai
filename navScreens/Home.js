@@ -62,7 +62,7 @@ const Home = () => {
 
                     <TouchableOpacity style={styles.modalRemoveButton} onPress={() => setModalVisible(false)}>
                         <View>
-                            <Ionicons name="arrow-down" size={24} color="#8a344c" />
+                            <Ionicons name="arrow-down" size={24} color="#BA5255" />
                         </View>
                     </TouchableOpacity>
 
@@ -107,7 +107,7 @@ const Home = () => {
                         </View>
                     </ScrollView>
 
-                    <Text style={{fontWeight: 'bold', color: '#8a344c', paddingVertical: 10}}>
+                    <Text style={{fontWeight: 'bold', color: '#BA5255', paddingVertical: 10}}>
                         Click for more info!
                     </Text>
                 </View>
@@ -153,18 +153,18 @@ const styles = StyleSheet.create({
     tempCon: {
         width: '85%',
         paddingVertical: 50,
-        backgroundColor: 'white',
+        backgroundColor: 'green',
         margin: 10,
         alignItems: 'center'
     },
 
     counselorHeader: {
         width: '85%',
-        height: 'auto',
         backgroundColor: 'white',
         margin: 10,
         borderRadius: 10,
         paddingVertical: 10,
+        padding: 10,
         alignItems: 'center'
     },
 
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         alignSelf: 'center',
         padding: 10,
-        color: '#8a344c'
+        color: '#BA5255'
     },
 
 })

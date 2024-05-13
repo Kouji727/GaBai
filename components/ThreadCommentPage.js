@@ -440,7 +440,7 @@ const ThreadCommentPage = ({ route }) => {
                         onPress={handleAddComment}
                         disabled={addingComorBlank} // Disable TouchableOpacity when addingComment is true
                     >
-                        <Ionicons name="send" size={20} color={addingComorBlank ? '#ede1e5' : '#8a344c'} />
+                        <Ionicons name="send" size={20} color={addingComorBlank ? '#ede1e5' : '#BA5255'} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -456,7 +456,7 @@ export default ThreadCommentPage;
 const styles = StyleSheet.create({
 
     textInputDes: {
-        backgroundColor: '#e8d1d7',
+        backgroundColor: '#f5eded',
         width: '90%',
         borderRadius: 3,
         padding: 5,
@@ -495,9 +495,10 @@ const styles = StyleSheet.create({
 
     commentsCont: {
         borderLeftWidth: 2,
-        borderLeftColor: '#e8d1d7',
+        borderLeftColor: '#c4787a',
         marginLeft: 20,
         height: '80%',
+        opacity: 0.3
     },
 
     contentContainer: {
@@ -544,13 +545,13 @@ const styles = StyleSheet.create({
 
     foHeader: {
         flex: 1,
-        backgroundColor: '#F3E8EB',
+        backgroundColor: '#f5eded',
     },
 
     allCont: {
         alignSelf: 'center',
         width: '95%',
-        borderBottomColor: '#E2AFBF',
+        borderBottomColor: '#c4787a',
         borderBottomWidth: 1,
         padding: 5,
     },

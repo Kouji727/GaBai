@@ -31,7 +31,7 @@ export default function CounselorCont({ item }) {
                 </View>
 
                 <View style={styles.counselorDesc}>
-                    <Text style={{textAlign: 'center', fontSize: 15, color: '#8a344c'}}>
+                    <Text style={{textAlign: 'center', fontSize: 15, color: '#BA5255'}}>
                         {item.info1} {'\n'}
                         {item.info2}{'\n'}
                         {item.info3}
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     textC: {
         fontWeight: 'bold',
         fontSize: 20,
-        color: '#8a344c'
+        color: '#BA5255'
 
     },
 
