@@ -6,6 +6,8 @@ import LoginPage from '../screens/login';
 import MainScreen from './mainscreen';
 import Settings from '../navScreens/Settings';
 import ThreadCommentPage from '../components/ThreadCommentPage';
+import ThreadCommentPage2 from '../components/ThreadCommentPage copy';
+import Notifications from '../components/Notifications';
 const Stack = createNativeStackNavigator();
 
 const SignIn = () => {
@@ -31,6 +33,28 @@ const SignIn = () => {
         <Stack.Screen
           name="View Post"
           component={ThreadCommentPage}
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: '#BA5255' },
+            headerTintColor: 'white'
+          }}
+          
+        />
+
+        <Stack.Screen
+          name="View  Post"
+          component={ThreadCommentPage2}
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: '#BA5255' },
+            headerTintColor: 'white'
+          }}
+          
+        />
+
+        <Stack.Screen
+          name="Notifications"
+          component={Notifications}
           options={{
             headerShown: true,
             headerStyle: { backgroundColor: '#BA5255' },

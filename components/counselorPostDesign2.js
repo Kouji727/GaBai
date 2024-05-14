@@ -4,7 +4,7 @@ import { Octicons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { db, auth, firebase } from '../firebase';
-import EditPostCounselor from './editPostCounselor';
+import EditPostCounselor2 from './editPostCounselor copy';
 import ThreadDesignComment from './threadDesignComment';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,7 +12,8 @@ import { useNavigation } from '@react-navigation/native';
 
 
 
-const CounselorPostDesign = ({ item }) => {
+
+const CounselorPostDesign2 = ({ item }) => {
     const navigation = useNavigation();
     const [currentUser, setCurrentUser] = useState(null);
     const [firebaseImageUrlp, setFirebaseImageUrlp] = useState(null);
@@ -47,7 +48,7 @@ const CounselorPostDesign = ({ item }) => {
 
     // Fetch the content image
     useEffect(() => {
-      const unsubscribe = db.collection('threads').doc(item.id)
+      const unsubscribe = db.collection('questions').doc(item.id)
           .onSnapshot((threadSnapshot) => {
               if (threadSnapshot.exists) {
                   const threadData = threadSnapshot.data();
@@ -101,7 +102,7 @@ const CounselorPostDesign = ({ item }) => {
     }, []);
 
     useEffect(() => {
-        const threadRef = db.collection('threads').doc(item.id);
+        const threadRef = db.collection('questions').doc(item.id);
 
         const unsubscribe = threadRef.onSnapshot(snapshot => {
             const threadData = snapshot.data();
@@ -117,7 +118,7 @@ const CounselorPostDesign = ({ item }) => {
     };
 
     const toggleCommentModal = () => {
-            navigation.navigate('View Post', { item });
+            navigation.navigate('View  Post', { item });
         //setModalCommentVisible(!modalCommentVisible);
     };
 
@@ -147,7 +148,7 @@ const CounselorPostDesign = ({ item }) => {
     const deletePost = async () => {
         try {
             // Get the post image URL
-            const threadSnapshot = await db.collection('threads').doc(item.id).get();
+            const threadSnapshot = await db.collection('questions').doc(item.id).get();
             if (threadSnapshot.exists) {
                 const threadData = threadSnapshot.data();
                 if (threadData.image && threadData.image.img) {
@@ -158,7 +159,7 @@ const CounselorPostDesign = ({ item }) => {
                 }
             }
             // Delete the post document from Firestore
-            await db.collection('threads').doc(item.id).delete();
+            await db.collection('questions').doc(item.id).delete();
             console.log('Post deleted successfully!');
         } catch (error) {
             console.error('Error deleting post: ', error);
@@ -167,7 +168,7 @@ const CounselorPostDesign = ({ item }) => {
 
     const handleLike = async () => {
         try {
-            const threadRef = db.collection('threads').doc(item.id);
+            const threadRef = db.collection('questions').doc(item.id);
 
             const threadSnapshot = await threadRef.get();
             const threadData = threadSnapshot.data();
@@ -204,7 +205,7 @@ const CounselorPostDesign = ({ item }) => {
                 animationType="fade"
                 onRequestClose={() => { }}>
                 <View style={styles.modalContainer}>
-                    <EditPostCounselor item={item} onPress={toggleModal} submit={() => setModalVisible(false)} />
+                    <EditPostCounselor2 item={item} onPress={toggleModal} submit={() => setModalVisible(false)} />
                 </View>
             </Modal>
 
@@ -260,7 +261,6 @@ const CounselorPostDesign = ({ item }) => {
                     </View>
 
                     <View style={styles.settingsIcon}>
-                        
                         {currentUser && currentUser.username === item.username && (
                             <Menu name={`menu-${item.id}`}>
                                 <MenuTrigger>
@@ -316,7 +316,7 @@ const CounselorPostDesign = ({ item }) => {
     );
 };
 
-export default CounselorPostDesign;
+export default CounselorPostDesign2;
 
 const styles = StyleSheet.create({
 

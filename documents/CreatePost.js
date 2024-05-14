@@ -17,12 +17,51 @@ const CreatePost = ({ cancel, closeAfter }) => {
   const validationSchema = yup.object().shape({
     content: yup.string().required(),
   });
+
+  console.log(new Date())
   
   const firebaseImageUrl = useProfilePicture();
   const [userData, setUserData] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false); // Loading state
+  const [department, setDepartment] = useState(null);
+  const [course, setCourse] = useState(null);
+  const [year, setYear] = useState(null);
+  const [studentNum, setStudentNum] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const [role, setRole] = useState(null);
+  
+  useEffect(() => {
+    if (currentUser) {
+      const collection = currentUser?.role === 'admin' ? 'question' : 'threads';
+      setRole(collection);
+    }
+  }, [currentUser]);
+  
+
+
+  // Set current user by targeting UID in the users collection
+  useEffect(() => {
+      const fetchUserData = async () => {
+          const userDoc = await db.collection('users').doc(auth.currentUser?.uid).get();
+          if (userDoc.exists) {
+              setCurrentUser(userDoc.data());
+          }
+      };
+
+      fetchUserData();
+
+      const unsubscribe = db.collection('users').doc(auth.currentUser?.uid)
+          .onSnapshot((doc) => {
+              if (doc.exists) {
+                  setCurrentUser(doc.data());
+              }
+          });
+
+      return () => unsubscribe();
+  }, []);
   
       const inappropriateWords = ['tanga', 'gago', 'gaga','putangina', 'tarantado','puke','pepe', 'pokpok', 'shit', 'bullshit',
       'fuck', 'fck' , 'whore', 'puta', 'tangina' ,'syet', 'tite', 'kupal', 'kantot', 'hindot', 'nigga', 'motherfucker', 'kinginamo', 'taenamo'
@@ -33,6 +72,7 @@ const CreatePost = ({ cancel, closeAfter }) => {
         const userDoc = await db.collection('users').doc(auth.currentUser?.uid).get();
         if (userDoc.exists) {
           setUserData(userDoc.data());
+
         }
       };
 
@@ -42,6 +82,10 @@ const CreatePost = ({ cancel, closeAfter }) => {
         .onSnapshot((doc) => {
           if (doc.exists) {
             setUserData(doc.data());
+            setDepartment(doc.data().department);
+            setCourse(doc.data().course);
+            setYear(doc.data().year);
+            setStudentNum(doc.data().studentNumber);
           }
         });
   
@@ -103,6 +147,8 @@ const CreatePost = ({ cancel, closeAfter }) => {
     };
 
     const handleSubmit = async (values) => {
+      const postCollection = currentUser.role == 'admin' ? 'questions' : 'threads';
+      console.log(postCollection)
       try {
         let imageUrl = null;
         let isInappropriate = false; // Initialize isInappropriate to false
@@ -121,20 +167,24 @@ const CreatePost = ({ cancel, closeAfter }) => {
             break;
           }
         }
-    
 
-          
 
     
         setLoading(true); // Start loading
+    
 
-        db.collection('threads').add({
+    
+        db.collection(postCollection).add({
           username: userData?.username || 'Anonymous',
           content: values.content,
           createdAt: new Date(),
           like: 0,
           comment: 0,
           image: imageUrl ? { img: imageUrl } : null,
+          department: department,
+          course: course,
+          year: year,
+          studentNum: studentNum,
           isInappropriate: isInappropriate // Set isInappropriate based on the check
         }).then(result => {
           setLoading(false);
@@ -145,6 +195,7 @@ const CreatePost = ({ cancel, closeAfter }) => {
         console.error("Error creating post: ", error);
       }
     };
+    
     
   
 

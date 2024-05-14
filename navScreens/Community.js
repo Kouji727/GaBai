@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CreateMessage from '../components/createMessage';
 import ContentItem from '../components/contentItem';
 import CounselorPostDesign from '../components/counselorPostDesign';
+import CounselorPostDesign2 from '../components/counselorPostDesign2';
 import UserPostDesign from '../components/userPostDesign';
 import EditPost from '../components/editPost';
 
@@ -20,6 +21,15 @@ export default function Community() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [threads, setThreads] = useState();
+  const [questions, setQuestions] = useState();
+
+const streamPosts = (observer) => {
+    db.collection('threads').onSnapshot(observer)
+}
+
+const streamPostsQuestions = (observer) => {
+  db.collection('questions').onSnapshot(observer)
+}
 
   const mapDocToPost = (document) => {
     const createdAt = document.data().createdAt.toDate();
@@ -86,12 +96,38 @@ export default function Community() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = streamPostsQuestions({
+      next: querySnapshot => {
+        const questions = querySnapshot.docs.map(docSnapshot => mapDocToPost(docSnapshot));
+        // Sort threads by createdAt date
+        questions.sort((a, b) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          if (isNaN(dateA) || isNaN(dateB)) {
+            return 0;
+          }
+          return dateB - dateA;
+        });
+        setQuestions(questions);
+        setLoading(false);
+      },
+      error: (error) => {
+        console.log(error);
+        setLoading(false);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
 
   return (
     <MenuProvider skipInstanceCheck>
+
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}>
@@ -106,6 +142,28 @@ export default function Community() {
           </TouchableWithoutFeedback>
 
         </View>
+
+        <View style={{justifyContent: 'center', alignItems: 'center', borderBottomWidth: 1, paddingVertical: 15, borderColor: '#BA5255'}}>
+          <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>Featured Question</Text>
+        </View>
+
+        <View style={styles.content}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#8a344c" />
+            </View>
+          ) : (
+            <>
+              {questions?.map(question => <CounselorPostDesign2 key={question.id} item={{ ...question, createdAt: question.formattedDate }} />)}
+            </>
+
+          )}
+        </View >
+
+        <View style={{justifyContent: 'center', alignItems: 'center', borderBottomWidth: 1, paddingVertical: 15, borderColor: '#BA5255'}}>
+                        <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>Messages</Text>
+        </View>
+
 
         <View style={styles.content}>
           {loading ? (

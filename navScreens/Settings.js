@@ -263,6 +263,7 @@ export default function Settings() {
                     {editableFields.map(field => (
                         <EditInfo key={field} item={{ Field: field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), Value: userData[field] || '' }} />
                     ))}
+                    <NotEditInfo fieldName={'Department'} text={userData.department}/>
                     <NotEditInfo fieldName={'Course'} text={userData.course}/>
                     <NotEditInfo fieldName={'Year'} text={userData.year}/>
                     <NotEditInfo fieldName={'Student No.'} text={userData.studentNumber}/>

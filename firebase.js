@@ -39,6 +39,10 @@ export const streamPosts = (observer) => {
     db.collection('threads').onSnapshot(observer)
 }
 
+export const streamPostsQuestions = (observer) => {
+  db.collection('questions').onSnapshot(observer)
+}
+
 export const streamCounselor = (observer) => {
     db.collection('users').onSnapshot(observer)
 }
