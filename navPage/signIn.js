@@ -8,6 +8,7 @@ import Settings from '../navScreens/Settings';
 import ThreadCommentPage from '../components/ThreadCommentPage';
 import ThreadCommentPage2 from '../components/ThreadCommentPage copy';
 import Notifications from '../components/Notifications';
+import Community from '../navScreens/Community';
 const Stack = createNativeStackNavigator();
 
 const SignIn = () => {
@@ -55,6 +56,17 @@ const SignIn = () => {
         <Stack.Screen
           name="Notifications"
           component={Notifications}
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: '#BA5255' },
+            headerTintColor: 'white'
+          }}
+          
+        />
+
+        <Stack.Screen
+          name="Freedom Wall"
+          component={Community}
           options={{
             headerShown: true,
             headerStyle: { backgroundColor: '#BA5255' },

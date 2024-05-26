@@ -7,6 +7,9 @@ import { FontAwesome } from '@expo/vector-icons';
 import { auth, db } from '../firebase';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
+import { setDoc, doc, serverTimestamp } from 'firebase/firestore'; // Add this line
 
 export default function Schedule() {
     const navigation = useNavigation();
@@ -14,43 +17,44 @@ export default function Schedule() {
     const [modalNotifVisible, setModalNotifVisible] = useState(false);
     const [counselors, setCounselors] = useState([]);
     const [selectedCounselor, setSelectedCounselor] = useState('');
-    const [reason, setReason] = useState();
+    const [reason, setReason] = useState('');
     const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
     const [selectedTime, setSelectedTime] = useState(new Date(null));
     const [oneHour, setOnehour] = useState(new Date(null));
+    const eventId = uuidv4(); // Change this line
 
     const [tVisible, setTVisible] = useState(false);
 
     const addSchedule = async () => {
-
         const startTime = selectedDate + 'T' + selectedTime.toLocaleTimeString() + '+08:00'
         const endTime =  selectedDate + 'T' + oneHour.toLocaleTimeString() + '+08:00'
 
+        console.log(startTime);
+      
         try {
-            setModalVisible(false);
-            await db.collection('schedule').add({
-                allDay: false,
-                counselor: selectedCounselor,
-                course: currentUser.course,
-                department: currentUser.department,
-                end: endTime,
-                read: false,
-                reasonMessage: reason,
-                start: startTime,
-                state: 'pending',
-                studentNum: currentUser.studentNumber,
-                timestamp: new Date(),
-                title: 'Schedule',
-                username: currentUser.username,
-            });
-            setReason('');
-            setSelectedCounselor('');
-
+          setModalVisible(false);
+          await setDoc(doc(db, "schedule", eventId), {
+            title: "Schedule",
+            counselor: selectedCounselor,
+            studentNum: currentUser.studentNumber,
+            course: currentUser.course,
+            start: startTime,
+            end: endTime,
+            allDay: false,
+            reasonMessage: reason,
+            username: currentUser.username, 
+            state: "pending",
+            timeStamp: serverTimestamp(),
+            department: currentUser.department,
+            read: false,
+            year: currentUser.year
+          });
+          setReason('');
+          setSelectedCounselor('');
         } catch (error) {
-            console.error('Error adding schedule:', error);
+          console.error('Error adding schedule:', error);
         }
-
-    };
+      };
     
 
     useEffect(() => {
@@ -324,7 +328,7 @@ export default function Schedule() {
                                                 ' ' + item.endDay : ''} {''}
                                             {formatTime(item.endTime)}
                                         </Text>
-                                        {item.state &&(
+                                        {item.state && currentUser.username === item.username &&(
                                             <Text>State: {item.state}</Text>
                                         )}
                                         {item && item.message && currentUser.username === item.username &&(
@@ -455,7 +459,8 @@ export default function Schedule() {
                 }}
             />
             {renderSchedules()}
-                {currentUser?.username === 'Jecho Torrefranca' &&(
+
+                {currentUser?.username === 'll' &&(
                     <TouchableOpacity style={styles.notif}  onPress={toggleModalNotif}>
                         <View style={styles.notifCount}>
                             <Text style={{fontSize: 10, fontWeight: 'bold', color: 'white'}}>1</Text>

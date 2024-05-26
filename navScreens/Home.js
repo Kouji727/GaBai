@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ActivityIndicator, Image } from 'react-native';
 import CounselorCont from '../components/counselorCont';
 import CounselorIcons from '../components/counselorIcons';
 import { Ionicons } from '@expo/vector-icons';
 import { db, streamCounselor } from '../firebase';
+import Logo from '../assets/yabag.png';
+import LearnMore from '../components/LearnMore';
+import GAbout from '../components/GAbout';
 
 const Home = () => {
 
     const [modalVisible, setModalVisible] = useState(false);
-    const [selectedCounselor, setSelectedCounselor] = useState(null); // Add selectedCounselor state
+    const [selectedCounselor, setSelectedCounselor] = useState(null);
+    const [modalVisibleLearn, setModalVisibleLearn] = useState(false);
+    const [modalVisibleAbout, setModalVisibleAbout] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [counselors, setCounselor] = useState([]);
 
 
     const toggleModal = (item) => {
@@ -16,9 +23,13 @@ const Home = () => {
         setSelectedCounselor(item);
     };
 
-    const [loading, setLoading] = useState(true);
-    const [counselors, setCounselor] = useState([]);
+    const toggleModalLearn = () => {
+        setModalVisibleLearn(!modalVisibleLearn);
+    };
 
+    const toggleModalAbout = () => {
+        setModalVisibleAbout(!modalVisibleAbout);
+    };
 
     const mapDocToPost = (document) => {
         return {
@@ -28,10 +39,13 @@ const Home = () => {
             info2: document.data().info2,
             info3: document.data().info3,
             img: document.data().img,
+            link: document.data().link
         }
     }
+    
+    const [content, setContent] = useState(null); // Add state for content data
 
-    useEffect( () => {
+    useEffect(() => {
         const unsubscribe = streamCounselor({
             next: querySnapshot => {
                 const counselors = querySnapshot.docs
@@ -46,8 +60,34 @@ const Home = () => {
             }
         });
 
-        return unsubscribe;
-    }, [])
+        //regular
+        const fetchContent = async () => {
+            try {
+                const doc = await db.collection('content').doc('infotab').get();
+                if (doc.exists) {
+                    setContent(doc.data());
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchContent();
+
+    }, []);
+
+    //realtime
+    useEffect(() => {
+        const unsubscribe = db.collection('content').doc('infotab').onSnapshot(doc => {
+            if (doc.exists) {
+                setContent(doc.data());
+            }
+        }, error => {
+            console.log(error);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -57,28 +97,65 @@ const Home = () => {
                 visible={modalVisible}
                 animationType="slide"
                 onRequestClose={() => setModalVisible(false)}>
-                    <View style={styles.modalContainer}>
-                        {selectedCounselor && <CounselorCont item={selectedCounselor} />}
+                <View style={styles.modalContainer}>
+                    {selectedCounselor && <CounselorCont item={selectedCounselor} />}
 
                     <TouchableOpacity style={styles.modalRemoveButton} onPress={() => setModalVisible(false)}>
                         <View>
                             <Ionicons name="arrow-down" size={24} color="#BA5255" />
                         </View>
                     </TouchableOpacity>
-
-                    </View>
+                </View>
             </Modal>
+
+            {/* //learn more */}
+            <Modal
+                transparent={true}
+                visible={modalVisibleLearn}
+                animationType="slide"
+                onRequestClose={() => setModalVisibleLearn(false)}>
+                <View style={styles.modalContainer}>
+                    <LearnMore item={content}/>
+                    <TouchableOpacity style={styles.modalRemoveButton} onPress={() => setModalVisibleLearn(false)}>
+                        <View>
+                            <Ionicons name="arrow-down" size={24} color="#BA5255" />
+                        </View>
+                    </TouchableOpacity>
+                </View>
+
+            </Modal>
+                {/* //about */}
+                <Modal
+                transparent={true}
+                visible={modalVisibleAbout}
+                animationType="slide"
+                onRequestClose={() => setModalVisibleAbout(false)}>
+                <View style={styles.modalContainer}>
+                    <GAbout item={content}/>
+                    <TouchableOpacity style={styles.modalRemoveButton} onPress={() => setModalVisibleAbout(false)}>
+                        <View>
+                            <Ionicons name="arrow-down" size={24} color="#BA5255" />
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
+
 
             <View style={styles.conCont}>
 
-                <View style={styles.tempCon}>
-                    <Text>Ga-Bai</Text>
-                    <Text>Learn More</Text>
-                </View>
+                <TouchableOpacity style={styles.tempCon} onPress={toggleModalLearn}>
+                    <Image source={Logo} style={styles.logo} resizeMode="contain" />
+                    <Text style={{color: '#BA5255', fontSize: 20, fontWeight: 'bold'}}>Ga-Bai</Text>
+                    <Text style={{color: '#BA5255', fontSize: 15, fontWeight: 'bold'}}>Learn More</Text>
+                </TouchableOpacity>
 
-                <View style={styles.tempCon}>
+                <TouchableOpacity style={styles.tempCon} onPress={toggleModalAbout}>
+                    <View style={{width: 100, height: 100, borderRadius: 100, elevation: 3,  overflow: 'hidden', marginBottom: 15}}>
+                        <Image source={require('../assets/guidance.jpg')} style={{width: 100, height: 100, elevation: 3}} resizeMode='contain' />
+
+                    </View>
                     <Text>About our Guidance</Text>
-                </View>
+                </TouchableOpacity>
 
                 <View style={styles.counselorHeader}>
                     <Text style={styles.textext}>Our Counselors</Text>
@@ -107,7 +184,7 @@ const Home = () => {
                         </View>
                     </ScrollView>
 
-                    <Text style={{fontWeight: 'bold', color: '#BA5255', paddingVertical: 10}}>
+                    <Text style={{ fontWeight: 'bold', color: '#BA5255', paddingVertical: 10 }}>
                         Click for more info!
                     </Text>
                 </View>
@@ -153,9 +230,11 @@ const styles = StyleSheet.create({
     tempCon: {
         width: '85%',
         paddingVertical: 50,
-        backgroundColor: 'green',
+        backgroundColor: 'white',
         margin: 10,
-        alignItems: 'center'
+        alignItems: 'center',
+        borderRadius: 10,
+
     },
 
     counselorHeader: {
@@ -184,6 +263,17 @@ const styles = StyleSheet.create({
         padding: 10,
         color: '#BA5255'
     },
+
+    logo: {
+        height: 100,
+        marginBottom: 0,
+    },
+
+    modalLogo: {
+        height: 100,
+        marginBottom: 20,
+    },
+    
 
 })
 

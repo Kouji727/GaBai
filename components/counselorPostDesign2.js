@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const CounselorPostDesign2 = ({ item }) => {
     const navigation = useNavigation();
+    const [schedules, setSchedules] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [firebaseImageUrlp, setFirebaseImageUrlp] = useState(null);
     const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
@@ -298,8 +299,6 @@ const CounselorPostDesign2 = ({ item }) => {
                     </View>
                 )}
 
-                {/* DELETE AFTER */}
-                <Text>{item.id}</Text> 
                 <View style={styles.lowerButtonCont}>
                     <TouchableOpacity style={styles.icontainer} onPress={handleLike}>
                         <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />

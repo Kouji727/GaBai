@@ -17,9 +17,6 @@ const CreatePost = ({ cancel, closeAfter }) => {
   const validationSchema = yup.object().shape({
     content: yup.string().required(),
   });
-
-  console.log(new Date())
-  
   const firebaseImageUrl = useProfilePicture();
   const [userData, setUserData] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -148,7 +145,7 @@ const CreatePost = ({ cancel, closeAfter }) => {
 
     const handleSubmit = async (values) => {
       const postCollection = currentUser.role == 'admin' ? 'questions' : 'threads';
-      console.log(postCollection)
+
       try {
         let imageUrl = null;
         let isInappropriate = false; // Initialize isInappropriate to false

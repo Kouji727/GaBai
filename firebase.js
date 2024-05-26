@@ -46,6 +46,7 @@ export const streamPostsQuestions = (observer) => {
 export const streamCounselor = (observer) => {
     db.collection('users').onSnapshot(observer)
 }
+
 export const useProfilePicture = () => {
     const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
     const [user, setUser] = useState(null);

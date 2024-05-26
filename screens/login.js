@@ -102,10 +102,7 @@ const LoginPage = () => {
             <Text style={{ color: 'white', fontWeight: 'bold' }}>Login</Text>
           </TouchableHighlight>
 
-          <Text style={styles.textTest} >Forgot Password</Text>
-
-          <Text>{email}</Text>
-          <Text>{password}</Text>
+          {/* <Text style={styles.textTest} >Forgot Password</Text> */}
 
         </View>
       </View>
