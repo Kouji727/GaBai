@@ -9,6 +9,7 @@ import { useProfilePicture } from '../firebase';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
+import { Fontisto } from '@expo/vector-icons';
 
 const CreatePost = ({ cancel, closeAfter }) => {
   
@@ -27,6 +28,7 @@ const CreatePost = ({ cancel, closeAfter }) => {
   const [year, setYear] = useState(null);
   const [studentNum, setStudentNum] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isAnonymous, setIsAnonymous] = useState(false)
 
   const [role, setRole] = useState(null);
   
@@ -169,10 +171,11 @@ const CreatePost = ({ cancel, closeAfter }) => {
     
         setLoading(true); // Start loading
     
-
+// GET BACK HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
     
         db.collection(postCollection).add({
-          username: userData?.username || 'Anonymous',
+          username: isAnonymous ? "Anonymous" : userData?.username || 'Anonymous',
+          trueusername: userData?.username || 'Anonymous', 
           content: values.content,
           createdAt: new Date(),
           like: 0,
@@ -268,6 +271,27 @@ const CreatePost = ({ cancel, closeAfter }) => {
                         </TouchableOpacity>
 
                     </View>
+
+                    {!loading &&(
+                      <View style={{justifyContent: 'center', alignItems: 'center', marginVertical: 10}}>
+                        <View style={{flexDirection: 'row', padding: 10, paddingHorizontal: 20, borderRadius: 10, backgroundColor: '#F3E8EB', elevation: 2, shadowColor: '#8a344c',}}>
+                          <Text style={{marginRight: 10, color: '#8a344c'}}>
+                            Post as Anonymous
+                          </Text>
+
+                          <TouchableOpacity onPress={() => {setIsAnonymous(!isAnonymous)}}>
+                            <Fontisto name={isAnonymous ? "checkbox-active" : "checkbox-passive"} size={24} color="#8a344c" />
+                          </TouchableOpacity>
+
+
+                        </View>
+
+                      </View>
+
+                    )}
+
+
+
                 </View>
             </View>
             <View style={styles.canAndSub}>

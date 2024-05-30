@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Alert, ScrollView, TouchableW
 import { db, streamPosts, firebase } from '../firebase';
 import { FontAwesome } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import CreateMessage from '../components/createMessage';
 import ContentItem from '../components/contentItem';
@@ -23,6 +24,11 @@ export default function Community() {
   const [threads, setThreads] = useState();
   const [questions, setQuestions] = useState();
   const [dropddown, setdropddown] = useState(false);
+  const [featuredClose, setFeaturedClose] = useState(true);
+
+  const toggleFeatured = () => {
+    setFeaturedClose(!featuredClose);
+  }
 
   const toggleDropdown = () => {
     setdropddown(!dropddown);
@@ -59,6 +65,7 @@ const streamPostsQuestions = (observer) => {
       formattedDate: formattedDate, // Add formattedDate here
       like: document.data().like,
       comment: document.data().comment,
+      trueusername: document.data().trueusername,
     };
   };
 
@@ -137,61 +144,65 @@ const streamPostsQuestions = (observer) => {
         style={styles.container}
         showsVerticalScrollIndicator={false}>
 
-        <View style={styles.fSpace}>
-          <Text style={styles.fSpaceText}>
-            Freedom Space
-          </Text>
-
-          <TouchableWithoutFeedback onPress={toggleModal}>
-            <FontAwesome name="plus-square-o" size={24} color="black" />
-          </TouchableWithoutFeedback>
-
-        </View>
-
         <View>
 
-          <View style={{justifyContent: 'center', alignItems: 'center', borderBottomWidth: 1, paddingVertical: 15, borderColor: '#BA5255'}}>
-            <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>Featured Question</Text>
+          <View style={{justifyContent: 'center', alignItems: 'center', paddingVertical: 15, backgroundColor: '#BA5255', flexDirection: 'row'}}>
+            <Text style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>Featured Question</Text>
+
+            <TouchableOpacity style={{backgroundColor: 'white', padding: 5, borderRadius: 100, alignItems:'center', justifyContent: 'center', width: '10%', aspectRatio: 1, marginLeft: 10}} onPress={toggleFeatured}>
+              <FontAwesome name={!featuredClose ? "chevron-down" : "chevron-up"} size={15} color="#BA5255"/>
+
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.content}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#8a344c" />
+          {/* sdjkdf */}
+
+          {featuredClose &&(
+            <View>
+              <View style={styles.content}>
+                {loading ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#8a344c" />
+                  </View>
+                ) : (
+                  <>
+                    {!dropddown ? (
+                      questions?.slice(0, 1).map(question => (
+                        <CounselorPostDesign2 key={question.id} item={{ ...question, createdAt: question.formattedDate }} />
+                      ))
+                    ) : (
+                      questions?.map(question => (
+                        <CounselorPostDesign2 key={question.id} item={{ ...question, createdAt: question.formattedDate }} />
+                      ))
+                    )}
+                  </>
+                )}
+
+              </View >
+
+              <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 10}}>
+                <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row', backgroundColor: '#BA5255', padding: 10, borderRadius: 10, paddingHorizontal: 15}} onPress={toggleDropdown}>
+
+                  <Text style={{marginRight: 10, fontWeight: 'bold', color: 'white', fontSize: 10}}>
+                    {dropddown ? "Hide" : "See More"}
+                  </Text>
+                  <FontAwesome name={dropddown ? "eye-slash" : "eye"} size={14} color="white" />
+                  
+                </TouchableOpacity>
+
+              </View>
+
+
             </View>
-          ) : (
-            <>
-              {!dropddown ? (
-                questions?.slice(0, 1).map(question => (
-                  <CounselorPostDesign2 key={question.id} item={{ ...question, createdAt: question.formattedDate }} />
-                ))
-              ) : (
-                questions?.map(question => (
-                  <CounselorPostDesign2 key={question.id} item={{ ...question, createdAt: question.formattedDate }} />
-                ))
-              )}
-            </>
+
           )}
 
-          </View >
-
-          <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 10}}>
-            <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row', backgroundColor: '#BA5255', padding: 10, borderRadius: 10, paddingHorizontal: 15}} onPress={toggleDropdown}>
-
-              <Text style={{marginRight: 10, fontWeight: 'bold', color: 'white', fontSize: 10}}>
-                {dropddown ? "Hide" : "See More"}
-              </Text>
-              <FontAwesome name={dropddown ? "eye-slash" : "eye"} size={14} color="white" />
-              
-            </TouchableOpacity>
-
-          </View>
 
 
         </View>
 
-        <View style={{justifyContent: 'center', alignItems: 'center', borderBottomWidth: 1, paddingVertical: 15, borderColor: '#BA5255'}}>
-                        <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>Messages</Text>
+        <View style={{justifyContent: 'center', alignItems: 'center', paddingVertical: 15, backgroundColor: '#BA5255', marginTop: 10}}>
+                        <Text style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>Messages</Text>
         </View>
 
 
@@ -221,6 +232,15 @@ const streamPostsQuestions = (observer) => {
 
       </ScrollView>
 
+        <TouchableOpacity style={styles.floatingButtonContainer} onPress={toggleModal}>
+        <View onPress={toggleModal}>
+          <View style={styles.floatingButton}>
+            <MaterialCommunityIcons name="comment-plus-outline" size={24} color="white" />
+          </View>
+        </View>
+      </TouchableOpacity>
+
+
     </MenuProvider>
 
 
@@ -233,6 +253,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5eded'
+  },
+
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+  },
+  floatingButton: {
+    backgroundColor: '#BA5255',
+    width: 60,
+    height: 60,
+    borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   content: {

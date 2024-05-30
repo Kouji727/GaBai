@@ -7,6 +7,7 @@ import { StyleSheet } from 'react-native';
 
 //navScreens
 import Community from '../navScreens/Community';
+import MainCommunity from '../navScreens/MainCommunity';
 import Apps from '../navScreens/Apps';
 import Inspo from '../navScreens/Inspo';
 import Schedule from '../navScreens/Schedule';
@@ -79,7 +80,7 @@ const NavigationPage = () => {
         <Tab.Screen name="Schedule" component={Schedule} />
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Apps" component={Apps} />
-        <Tab.Screen name="Community" component={Community} />
+        <Tab.Screen name="Community" component={MainCommunity} />
 
       </Tab.Navigator>
       

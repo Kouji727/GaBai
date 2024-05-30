@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Calendar } from 'react-native-calendars';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from '../firebase';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -23,6 +24,7 @@ const Schedule = () => {
     const [isTimeSelected, setIsTimeSelected] = useState(false);
     const [oneHour, setOnehour] = useState(new Date(null));
     const eventId = uuidv4(); // Change this line
+    const [legendModal, setLegendModal] = useState(false);
 
     const [tVisible, setTVisible] = useState(false);
 
@@ -118,20 +120,56 @@ const Schedule = () => {
         
     };
 
+    const openingHour = 7; // 7:59 AM
+    const openingMinute = 59;
+    const closingHour = 16; // 4:00 PM
+    const closingMinute = 0;
+    
     const handleConfirmTime = (time) => {
-        // Round time to the nearest 15 minutes
-        const roundedTime = new Date(Math.round(time.getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000));
+        // Extract hours and minutes from the selected time
+        const selectedHour = time.getHours();
+        const selectedMinute = time.getMinutes();
     
-        // Add one hour to the rounded time
-        const roundedTimePlusOneHour = new Date(roundedTime.getTime() + (60 * 60 * 1000));
+        // Get current date and time
+        const currentDate = new Date();
+        const currentHour = currentDate.getHours();
+        const currentMinute = currentDate.getMinutes();
     
-        setSelectedTime(roundedTime);
-        setOnehour(roundedTimePlusOneHour);
-        setIsTimeSelected(true);
-        toggleTimePicker();
-        setTVisible(true);
-        console.log('yawa', isTimeSelected);
+        // Check if the selected time is past the current time
+        if (
+            selectedHour < currentHour ||
+            (selectedHour === currentHour && selectedMinute < currentMinute)
+        ) {
+            // Display error message if the selected time is past the current time
+            alert("Cannot Schedule Past Time");
+            return;
+        }
+    
+        // Check if the selected time falls within the allowed range
+        if (
+            (selectedHour === openingHour && selectedMinute >= openingMinute) ||
+            (selectedHour > openingHour && selectedHour < closingHour) ||
+            (selectedHour === closingHour && selectedMinute <= closingMinute)
+        ) {
+            // Round time to the nearest 15 minutes
+            const roundedTime = new Date(Math.round(time.getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000));
+        
+            // Add one hour to the rounded time
+            const roundedTimePlusOneHour = new Date(roundedTime.getTime() + (60 * 60 * 1000));
+        
+            setSelectedTime(roundedTime);
+            setOnehour(roundedTimePlusOneHour);
+            setIsTimeSelected(true);
+            toggleTimePicker();
+            setTVisible(true);
+        } else {
+            // Display error message if the selected time is outside the allowed range
+            alert("Cannot schedule outside 8:00 AM to 4:00 PM");
+        }
     };
+    
+    
+    
     
 
     const [selectedDate, setSelectedDate] = useState(
@@ -479,12 +517,74 @@ const Schedule = () => {
 
 
             </Modal>
+
+            <Modal
+                transparent={true}
+                visible={legendModal}
+                animationType="slide"
+                onRequestClose={() => { }}>
+                <View style={styles.modalContainer}>
+                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                        <View style={{backgroundColor: '#f5eded', width: "90%", borderRadius: 20, alignItems: 'center', justifyContent: 'center', paddingVertical: 25}}>
+
+                            <View style={{justifyContent: 'space-around', alignItems: 'center', borderBottomWidth: 1, width: "100%", marginVertical: 10, borderBottomColor: '#BA5255', width: "80%"}}>
+                                <View style={{width: '20%', aspectRatio: 1, backgroundColor: 'white', borderRadius: 100, justifyContent: 'center', alignItems: 'center'}}>
+                                    <View style={{width: '50%', aspectRatio: 1, backgroundColor: '#BA5255', borderRadius: 100}}/>
+                                </View>
+                                <Text style={{marginBottom: 20, marginTop: 5}}>
+                                    Has Approved Schedule
+                                </Text>
+                            </View>
+
+                            <View style={{justifyContent: 'space-around', alignItems: 'center', borderBottomWidth: 1, width: "100%", marginVertical: 10, borderBottomColor: '#BA5255', width: "80%"}}>
+                                <View style={{width: '20%', aspectRatio: 1, backgroundColor: 'white', borderRadius: 100, justifyContent: 'center', alignItems: 'center'}}>
+                                    <View style={{width: '50%', aspectRatio: 1, backgroundColor: '#eacccd', borderRadius: 100}}/>
+                                </View>
+                                <Text style={{marginBottom: 20, marginTop: 5}}>
+                                    Has Scheduled, Not Approved
+                                </Text>
+                            </View>
+
+                            <View style={{justifyContent: 'space-around', alignItems: 'center', borderBottomWidth: 1, width: "100%", marginVertical: 10, borderBottomColor: '#BA5255', width: "80%"}}>
+                                <View style={{width: '20%', aspectRatio: 1, backgroundColor: 'white', borderRadius: 100, justifyContent: 'center', alignItems: 'center'}}>
+                                    <View style={{width: '20%', aspectRatio: 1, backgroundColor: '#00bfec', borderRadius: 100}}/>
+                                </View>
+                                <Text style={{marginBottom: 20, marginTop: 5}}>
+                                    Has an Event / Other Student's Schedule
+                                </Text>
+                            </View>
+
+                            <View style={{justifyContent: 'space-around', alignItems: 'center', width: "100%", marginVertical: 10, width: "80%"}}>
+                                <View style={{width: '20%', aspectRatio: 1, backgroundColor: 'white', borderRadius: 100, justifyContent: 'center', alignItems: 'center'}}>
+                                    <View style={{width: '50%', aspectRatio: 1, backgroundColor: '#E5E5E5', borderRadius: 100}}/>
+                                </View>
+                                <Text style={{ marginTop: 5}}>
+                                    Disabled Date
+                                </Text>
+                            </View>
+
+                        </View>
+
+                    </View>
+
+                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+
+                        <View style={{justifyContent: 'center', alignItems: 'center', width: "90%", marginTop: 20}}>
+                            <TouchableOpacity style={{backgroundColor: '#f5eded', padding: 15, borderRadius: 100}} onPress={() => {setLegendModal(!legendModal)}}>
+                                <Ionicons name="arrow-down" size={24} color="#BA5255" />
+                            </TouchableOpacity>
+
+                        </View>
+                    </View>
+                </View>
+
+            </Modal>
+
             <Calendar
     style={styles.calendarDes}
     current={new Date(new Date().getTime() + (8 * 60 * 60 * 1000)).toISOString().split('T')[0]}
     onDayPress={day => {
         setSelectedDate(day.dateString);
-        console.log('selected day', day);
     }}
     markedDates={{
         ...userDates,
@@ -516,11 +616,20 @@ const Schedule = () => {
 
                 </TouchableOpacity>)}
 
-            <View style={styles.addSchedule}>
-                <TouchableOpacity style={styles.icontainer} onPress={toggleModal}>
-                    <FontAwesome name="calendar-plus-o" size={24} color="#BA5255"  />
+                <View style={styles.addSchedule}>
+                    {selectedDate >= new Date().toISOString().split('T')[0] && ( // Check if selectedDate is equal to or ahead of the current date
+                        <TouchableOpacity style={styles.icontainer} onPress={toggleModal}>
+                            <FontAwesome name="calendar-plus-o" size={24} color="white" />
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                <TouchableOpacity style={{position: 'absolute', padding: 10, bottom: "40%", right: 0}} onPress={() => {setLegendModal(!legendModal)}}>
+                    <View style={{backgroundColor: '#BA5255', padding: 10, borderRadius: 100}}>
+                        <Ionicons name="information-circle-outline" size={24} color="white" />
+                    </View>
                 </TouchableOpacity>
-            </View>
+
 
         </View>
     );
@@ -532,6 +641,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'space-between',
+    },
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 
     defaultPfp: {
@@ -612,7 +727,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 100,
         aspectRatio: 1,
-        backgroundColor: 'white',
+        backgroundColor: '#BA5255',
         position: 'absolute',
         bottom: 0,
     },

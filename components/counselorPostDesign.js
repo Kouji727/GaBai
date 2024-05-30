@@ -9,6 +9,8 @@ import ThreadDesignComment from './threadDesignComment';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { TextInput } from 'react-native-gesture-handler';
+import { addDoc, collection } from 'firebase/firestore';
 
 
 
@@ -23,6 +25,8 @@ const CounselorPostDesign = ({ item }) => {
     const [user, setUser] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
     const [currentUserLiked, setCurrentUserLiked] = useState(false);
+    const [isReportUser, setIsReportUser] = useState(false);
+    const [reportmessage, setreportmessage] = useState('');
 
     // Set current user by targeting UID in the users collection
     useEffect(() => {
@@ -129,6 +133,32 @@ const CounselorPostDesign = ({ item }) => {
         toggleModal();
     };
 
+    const reportOption = () => {
+        toggleModal();
+    };
+
+    const addReport = async () => {
+        try {
+          await addDoc(collection(db, 'reports'), { 
+            createdAt: new Date(),
+            message: reportmessage,
+            reportedBy: currentUser.username,
+            reportedName: item.trueusername,
+            threadId: item.id,
+        
+        });
+
+        alert("Report Submitted");
+
+        setIsReportUser(!isReportUser);
+
+        } catch (error) {
+    
+          console.error('Error adding report:', error);
+          throw error;
+        }
+      };
+
     const deleteOption = () => {
         Alert.alert(
             'Delete Post?',
@@ -234,6 +264,55 @@ const CounselorPostDesign = ({ item }) => {
                 </View>
             </Modal>
 
+            <Modal
+                transparent={true}
+                visible={isReportUser}
+                animationType="fade"
+                onRequestClose={() => { }}>
+                <View style={styles.modalContainer}>
+                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                        <View style={{width: '90%', backgroundColor: '#f5eded', padding: 20,  borderRadius: 15}}>
+                            <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>
+                                Report Thread
+                            </Text>
+
+                            <TextInput
+                            style={{
+                                borderColor: '#BA5255',
+                                borderWidth: 1,
+                                paddingVertical: 10,
+                                paddingLeft: 10,
+                                marginTop: 10
+                            }}
+                            onChangeText={(text) => setreportmessage(text)}
+                            placeholder={'Enter your report message'}
+                            value={reportmessage}
+                            autoFocus={true}
+                            multiline={true}
+                            />
+
+                            <View style={{justifyContent: 'space-around', alignItems: 'center', flexDirection: 'row', paddingTop: 10}}>
+                                <TouchableOpacity style={{backgroundColor: 'red', padding: 10, borderRadius: 8, backgroundColor: '#F3E8EB', elevation: 3}} onPress={addReport}>
+                                    <Text style={{color: '#8a344c', }}>
+                                        Submit Report
+                                    </Text>
+
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={{backgroundColor: 'red', padding: 10, borderRadius: 8, backgroundColor: '#F3E8EB', elevation: 3}} onPress={() => {setIsReportUser(!isReportUser)}}>
+                                    <Text style={{color: '#8a344c', }}>
+                                        Cancel
+                                    </Text>
+
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                    </View>
+                    
+                </View>
+            </Modal>
+
             <View style={{ margin: 5 }}>
                 <View style={styles.profileName}>
                     <View style={styles.topItems}>
@@ -261,7 +340,6 @@ const CounselorPostDesign = ({ item }) => {
 
                     <View style={styles.settingsIcon}>
                         
-                        {currentUser && currentUser.username === item.username && (
                             <Menu name={`menu-${item.id}`}>
                                 <MenuTrigger>
                                     <View style={{ width: 40, height: 40, transform: [{ rotate: '90deg' }],  alignItems: 'center', justifyContent: 'center' }}>
@@ -270,15 +348,29 @@ const CounselorPostDesign = ({ item }) => {
                                 </MenuTrigger>
 
                                 <MenuOptions customStyles={menuStyles}>
-                                    <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
-                                        <Text style={styles.menuItemTextStyle}>Edit</Text>
+
+                                {currentUser && currentUser.username === item.trueusername && (
+                                    <>
+                                    
+                                        <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
+                                            <Text style={styles.menuItemTextStyle}>Edit</Text>
+                                        </MenuOption>
+
+                                        <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
+                                            <Text style={styles.menuItemTextStyle}>Delete</Text>
+                                        </MenuOption>
+                                    
+                                    </>
+
+                                    )}
+                                   
+
+                                    <MenuOption onSelect={() => {setIsReportUser(!isReportUser)}} style={styles.menuItemStyle}>
+                                        <Text style={styles.menuItemTextStyle}>Report</Text>
                                     </MenuOption>
-                                    <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
-                                        <Text style={styles.menuItemTextStyle}>Delete</Text>
-                                    </MenuOption>
+
                                 </MenuOptions>
                             </Menu>
-                        )}
                     </View>
                 </View>
 
@@ -298,7 +390,7 @@ const CounselorPostDesign = ({ item }) => {
                     </View>
                 )}
 
-                <Text>{item.id}</Text>
+                {/* <Text>{item.id}</Text> */}
 
                 <View style={styles.lowerButtonCont}>
                     <TouchableOpacity style={styles.icontainer} onPress={handleLike}>

@@ -28,6 +28,30 @@ const ThreadCommentPage = ({ route }) => {
     const [editedContent, setEditedContent] = useState('');
     const [addingComorBlank, setaddingComorBlank] = useState(true);
     const [threads, setThread] = useState([]);
+    const [isReportUser, setIsReportUser] = useState(false);
+    const [reportmessage, setreportmessage] = useState('');
+
+    const addReport = async () => {
+        try {
+          await addDoc(collection(db, 'reports'), { 
+            createdAt: new Date(),
+            message: reportmessage,
+            reportedBy: currentUser.username,
+            reportedName: item.trueusername,
+            threadId: item.id,
+        
+        });
+
+        alert("Report Submitted");
+
+        setIsReportUser(!isReportUser);
+
+        } catch (error) {
+    
+          console.error('Error adding report:', error);
+          throw error;
+        }
+      };
 
     const inappropriateWords = [
         'tanga', 'gago', 'gaga', 'putangina', 'tarantado', 'puke', 'pepe', 'pokpok', 'shit', 'bullshit',
@@ -304,6 +328,55 @@ const ThreadCommentPage = ({ route }) => {
                         </Modal>
 
                         <Modal
+                transparent={true}
+                visible={isReportUser}
+                animationType="fade"
+                onRequestClose={() => { }}>
+                <View style={styles.modalContainer}>
+                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                        <View style={{width: '90%', backgroundColor: '#f5eded', padding: 20,  borderRadius: 15}}>
+                            <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>
+                                Report Thread
+                            </Text>
+
+                            <TextInput
+                            style={{
+                                borderColor: '#BA5255',
+                                borderWidth: 1,
+                                paddingVertical: 10,
+                                paddingLeft: 10,
+                                marginTop: 10
+                            }}
+                            onChangeText={(text) => setreportmessage(text)}
+                            placeholder={'Enter your report message'}
+                            value={reportmessage}
+                            autoFocus={true}
+                            multiline={true}
+                            />
+
+                            <View style={{justifyContent: 'space-around', alignItems: 'center', flexDirection: 'row', paddingTop: 10}}>
+                                <TouchableOpacity style={{backgroundColor: 'red', padding: 10, borderRadius: 8, backgroundColor: '#F3E8EB', elevation: 3}} onPress={addReport}>
+                                    <Text style={{color: '#8a344c', }}>
+                                        Submit Report
+                                    </Text>
+
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={{backgroundColor: 'red', padding: 10, borderRadius: 8, backgroundColor: '#F3E8EB', elevation: 3}} onPress={() => {setIsReportUser(!isReportUser)}}>
+                                    <Text style={{color: '#8a344c', }}>
+                                        Cancel
+                                    </Text>
+
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                    </View>
+                    
+                </View>
+            </Modal>
+
+                        <Modal
                             visible={modalImgVisible}
                             transparent={true}
                             animationType="fade">
@@ -345,24 +418,38 @@ const ThreadCommentPage = ({ route }) => {
                                 </View>
 
                                 <View style={styles.settingsIcon}>
-                                    {currentUser && currentUser.username === updatedItem.username && (
-                                        <Menu name={`modal-menu-${updatedItem.id}`} skipInstanceCheck={true}>
-                                            <MenuTrigger>
-                                                <View style={{ width: 40, height: 40, transform: [{ rotate: '90deg' }], alignItems: 'center', justifyContent: 'center' }}>
-                                                    <Octicons name="kebab-horizontal" size={20} color="black" />
-                                                </View>
-                                            </MenuTrigger>
+                                <Menu name={`modal-menu-${updatedItem.id}`} skipInstanceCheck={true}>
+                                <MenuTrigger>
+                                    <View style={{ width: 40, height: 40, transform: [{ rotate: '90deg' }],  alignItems: 'center', justifyContent: 'center' }}>
+                                        <Octicons name="kebab-horizontal" size={20} color="black" />
+                                    </View>
+                                </MenuTrigger>
 
-                                            <MenuOptions customStyles={menuStyles}>
-                                                <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
-                                                    <Text style={styles.menuItemTextStyle}>Edit</Text>
-                                                </MenuOption>
-                                                <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
-                                                    <Text style={styles.menuItemTextStyle}>Delete</Text>
-                                                </MenuOption>
-                                            </MenuOptions>
-                                        </Menu>
+                                <MenuOptions customStyles={menuStyles}>
+
+                                {currentUser && currentUser.username === item.trueusername && (
+                                    <>
+                                    
+                                        <MenuOption onSelect={editOption} style={styles.menuItemStyle}>
+                                            <Text style={styles.menuItemTextStyle}>Edit</Text>
+                                        </MenuOption>
+
+                                        <MenuOption onSelect={deleteOption} style={styles.menuItemStyle}>
+                                            <Text style={styles.menuItemTextStyle}>Delete</Text>
+                                        </MenuOption>
+                                    
+                                    </>
+
                                     )}
+                                   
+
+                                    <MenuOption onSelect={() => {setIsReportUser(!isReportUser)}} style={styles.menuItemStyle}>
+                                        <Text style={styles.menuItemTextStyle}>Report</Text>
+                                    </MenuOption>
+
+                                </MenuOptions>
+                            </Menu>
+
                                 </View>
                             </View>
 
@@ -383,7 +470,7 @@ const ThreadCommentPage = ({ route }) => {
                             )}
 
                             {/* DELETE AFTER */}
-                            {/* <Text>{updatedItem.id}</Text> */}
+                            <Text>{updatedItem.id}</Text>
                             <View style={styles.lowerButtonCont}>
                                 <TouchableOpacity style={styles.icontainer} onPress={handleLike}>
                                     <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />

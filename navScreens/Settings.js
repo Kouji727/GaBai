@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Modal, Platform, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, Modal, Platform, Alert, ActivityIndicator, TextInput } from 'react-native';
 import * as ImagePicker from "expo-image-picker";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import EditInfo from '../components/editInfo';
@@ -11,6 +11,7 @@ import 'firebase/auth';
 import 'firebase/storage';
 import 'firebase/firestore';
 import NotEditInfo from '../components/notEditInfo';
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 
 export default function Settings() {
     const [userData, setUserData] = useState({});
@@ -22,6 +23,78 @@ export default function Settings() {
     const [uploading, setUploading] = useState(false);
     const [firebaseImageUrl, setFirebaseImageUrl] = useState(null);
     const [deleting, setDeleting] = useState(false);
+    const [cpVisible, setcpVisible] = useState(false);
+    const [prevPass, setPrevPass] = useState('');
+    const [conPassword, setConPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
+    const [disabledButton, setdisabledButton] = useState(false)
+
+    const validatePasswords = () => {
+        if (newPassword !== conPassword) {
+            setError("New passwords do not match.");
+            return false;
+        }
+        if (newPassword.length < 6) {
+            setError("New password must be at least 6 characters long.");
+            return false;
+        }
+        return true;
+    };
+    
+    const savePasswordChanges = async () => {
+        if (!validatePasswords()) return;
+    
+        try {
+            setdisabledButton(!disabledButton)
+
+            const user = auth.currentUser;
+    
+            if (!user) {
+                setError("No user is logged in.");
+                return;
+            }
+
+            const credential = EmailAuthProvider.credential(user.email, prevPass);
+    
+            await reauthenticateWithCredential(user, credential);
+            await updatePassword(user, newPassword);
+            
+    
+            setPrevPass('');
+            setNewPassword('');
+            setConPassword('');
+            setError(null);
+
+    
+            alert("Password updated successfully.");
+            setcpVisible(!cpVisible)
+            setTimeout(() => setSuccessMessage(null), 3000);
+            setTimeout(() => setdisabledButton(!disabledButton), 3000);
+        } catch (error) {
+            if (error.code === 'auth/wrong-password') {
+                setError("Current Password Doesn't Match");
+            } else if (error.code === 'auth/too-many-requests') {
+                setError("Too many attempts. Please try again later.");
+            } else {
+                setError("Current password is incorrect or there was an error updating the password. Please try again.");
+            }
+        }
+    };
+
+    const cancelModal = () => {
+        setPrevPass('');
+        setNewPassword('');
+        setConPassword('');
+
+        setcpVisible(!cpVisible)
+
+
+    }
+    
+    
+
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -238,6 +311,103 @@ export default function Settings() {
                     </View>
                 </View>
             </Modal>
+
+            <Modal
+            transparent={true}
+            visible={cpVisible}
+            animationType="slide"
+            onRequestClose={() => { }}
+            >
+                
+            <View style={styles.modalContainer}>
+                <View style={{backgroundColor: '#f5eded', width: '80%', padding: 30, paddingVertical: 35, borderRadius: 25}}>
+
+                            <TextInput
+                            style={{
+                                borderColor: '#BA5255',
+                                borderWidth: 1,
+                                paddingVertical: 10,
+                                paddingLeft: 10,
+                            }}
+                            onChangeText={(text) => setPrevPass(text)}
+                            placeholder={'Current Password'}
+                            value={prevPass}
+                            autoFocus={true}
+                            multiline={false}
+                            secureTextEntry={true}
+                            />
+                            <Text>{prevPass}</Text>
+
+                            <TextInput
+                            style={{
+                                borderColor: '#BA5255',
+                                borderWidth: 1,
+                                paddingVertical: 10,
+                                paddingLeft: 10,
+                            }}
+                            onChangeText={(text) => setNewPassword(text)}
+                            placeholder={'New Password'}
+                            value={newPassword}
+                            autoFocus={true}
+                            multiline={false}
+                            secureTextEntry={true}
+                            />
+                            <Text>{newPassword}</Text>
+
+                            <TextInput
+                            style={{
+                                borderColor: '#BA5255',
+                                borderWidth: 1,
+                                paddingVertical: 10,
+                                paddingLeft: 10,
+                            }}
+                            onChangeText={(text) => setConPassword(text)}
+                            placeholder={'Confirm New Password'}
+                            value={conPassword}
+                            autoFocus={true}
+                            multiline={false}
+                            secureTextEntry={true}
+                            />
+                            <Text>{conPassword}</Text>
+
+                            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={{color: 'red'}}>
+                                    {error}
+                                </Text>
+                            </View>
+
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+
+                        {!disabledButton &&(
+                            <>
+
+                            <TouchableOpacity style={{backgroundColor: '#F3E8EB', padding: 10, paddingHorizontal: 30, borderRadius: 10, elevation: 3}} onPress={savePasswordChanges}>
+                                <Text>
+                                    Save
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{backgroundColor: '#F3E8EB', padding: 10, paddingHorizontal: 30, borderRadius: 10, elevation: 3}} onPress={cancelModal}>
+                                <Text>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                            
+                            </>
+                        )}
+
+
+                    </View>
+
+                </View>
+
+            </View>
+            </Modal>
+
+            
+
+
+
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.profilePic}>
                     <View style={styles.counselorIcons}>
@@ -268,6 +438,16 @@ export default function Settings() {
                     <NotEditInfo fieldName={'Year'} text={userData.year}/>
                     <NotEditInfo fieldName={'Student No.'} text={userData.studentNumber}/>
                     <NotEditInfo fieldName={'Full Name'} text={userData.displayName}/>
+
+                    <TouchableOpacity style={{width: "80%", backgroundColor: '#BA5255', padding: 15, borderRadius: 5, justifyContent: 'center', alignItems: 'center'}} onPress={() => {setcpVisible(!cpVisible)}}>
+                        <View>
+                            <Text style={{fontWeight: 'bold', fontSize: 17, color: 'white'}}>
+                                Change Password
+                            </Text>
+
+                        </View>
+                    </TouchableOpacity>
+
                 </View>
                 <View style={styles.fill} />
             </ScrollView>
@@ -276,6 +456,12 @@ export default function Settings() {
 }
 
 const styles = StyleSheet.create({
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+
     fill: {
         height: 100
     },
