@@ -154,7 +154,8 @@ const Home = () => {
                         <Image source={require('../assets/guidance.jpg')} style={{width: 100, height: 100, elevation: 3}} resizeMode='contain' />
 
                     </View>
-                    <Text>About our Guidance</Text>
+                    <Text style={{color: '#BA5255', fontSize: 20, fontWeight: 'bold'}}>About Our Guidance</Text>
+                    <Text style={{color: '#BA5255', fontSize: 15, fontWeight: 'bold'}}>Learn More</Text>
                 </TouchableOpacity>
 
                 <View style={styles.counselorHeader}>

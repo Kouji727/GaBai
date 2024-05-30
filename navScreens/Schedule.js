@@ -11,19 +11,47 @@ import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { setDoc, doc, serverTimestamp } from 'firebase/firestore'; // Add this line
 
-export default function Schedule() {
+const Schedule = () => {
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
     const [modalNotifVisible, setModalNotifVisible] = useState(false);
     const [counselors, setCounselors] = useState([]);
     const [selectedCounselor, setSelectedCounselor] = useState('');
     const [reason, setReason] = useState('');
-    const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+    const [isTimePickerVisible, setTimePickerVisibility] = useState(null);
     const [selectedTime, setSelectedTime] = useState(new Date(null));
+    const [isTimeSelected, setIsTimeSelected] = useState(false);
     const [oneHour, setOnehour] = useState(new Date(null));
     const eventId = uuidv4(); // Change this line
 
     const [tVisible, setTVisible] = useState(false);
+
+    const getDisabledWeekends = () => {
+        const disabledDates = {};
+    
+        for (let year = 1970; year <= 2100; year++) { // Adjust the range of years as needed
+            for (let month = 0; month < 12; month++) {
+                const getLastDayOfMonth = (year, month) => {
+                    return new Date(year, month + 1, 0).getDate();
+                };
+    
+                const daysInMonth = getLastDayOfMonth(year, month);
+    
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateString = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    const date = new Date(dateString);
+                    const dayOfWeek = date.getDay(); // 0 is Sunday, 6 is Saturday
+                    if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
+                        disabledDates[dateString] = { disableTouchEvent: true, disableAllTouchEventsForDisabledDays: true, marked: false, dotColor: 'gray', selected: true, selectedColor: "#E5E5E5"};
+                    }
+                }
+            }
+        }
+    
+        return disabledDates;
+    };
+    
+    
 
     const addSchedule = async () => {
         const startTime = selectedDate + 'T' + selectedTime.toLocaleTimeString() + '+08:00'
@@ -51,6 +79,7 @@ export default function Schedule() {
           });
           setReason('');
           setSelectedCounselor('');
+          setIsTimeSelected(false);
         } catch (error) {
           console.error('Error adding schedule:', error);
         }
@@ -77,6 +106,7 @@ export default function Schedule() {
     const toggleModal = () => {
         setModalVisible(!modalVisible);
         setTVisible(false);
+        setIsTimeSelected(false);
     };
 
     const toggleModalNotif = () => {
@@ -85,6 +115,7 @@ export default function Schedule() {
 
     const toggleTimePicker = () => {
         setTimePickerVisibility(!isTimePickerVisible);
+        
     };
 
     const handleConfirmTime = (time) => {
@@ -96,8 +127,10 @@ export default function Schedule() {
     
         setSelectedTime(roundedTime);
         setOnehour(roundedTimePlusOneHour);
+        setIsTimeSelected(true);
         toggleTimePicker();
         setTVisible(true);
+        console.log('yawa', isTimeSelected);
     };
     
 
@@ -183,7 +216,8 @@ export default function Schedule() {
                     username: username || "No username",
                     counselor: counselor || "No counselor",
                     state: state || "No state",
-                    message: message || ""
+                    message: message || "",
+                    counselor: counselor
                 };
             });
             setSchedules(scheduleData);
@@ -201,7 +235,7 @@ export default function Schedule() {
                     name: name || "No event name",
                     description: description || "No description",
                     state: state,
-                    message: message
+                    message: message,
                 };
             });
             setEvents(eventData);
@@ -216,7 +250,7 @@ export default function Schedule() {
     const combinedData = [...schedules, ...events];
 
     const userDates = combinedData.reduce((acc, item) => {
-        const { start, end, username, name, state, message } = item;
+        const { start, end, username, name, state, message, counselor } = item;
         const startDate = new Date(start);
         const endDate = new Date(end);
         const localStartDate = new Date(startDate.getTime() + (8 * 60 * 60 * 1000)).toISOString().split('T')[0];
@@ -231,9 +265,9 @@ export default function Schedule() {
 
         dates.forEach(date => {
             if (!acc[date]) {
-                acc[date] = { marked: true, items: [{ startTime: startDate, endTime: endDate, username, name, state, message }] };
+                acc[date] = { marked: true, items: [{ startTime: startDate, endTime: endDate, username, name, state, message, counselor }] };
             } else {
-                acc[date].items.push({ startTime: startDate, endTime: endDate, username, name, state, message });
+                acc[date].items.push({ startTime: startDate, endTime: endDate, username, name, state, message, counselor });
             }
         });
 
@@ -328,12 +362,21 @@ export default function Schedule() {
                                                 ' ' + item.endDay : ''} {''}
                                             {formatTime(item.endTime)}
                                         </Text>
+
+                                        {item.counselor &&(
+                                            <Text>Counselor Assigned: {item.counselor}</Text>
+
+                                        )}
+
+
                                         {item.state && currentUser.username === item.username &&(
-                                            <Text>State: {item.state}</Text>
+                                            <Text>State: {item.state === 'reject' ? 'Rescheduled' : item.state}</Text>
                                         )}
                                         {item && item.message && currentUser.username === item.username &&(
                                             <Text>Counselor Message: {item.message}</Text>
                                         )}
+
+                                        
                                     </View>
                                 </View>
                             </View>
@@ -405,8 +448,8 @@ export default function Schedule() {
                                 </Picker>
                                 
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-
-                                    {selectedCounselor !== '' &&(
+{/* nvskfvndfkjd */}
+                                    {selectedCounselor !== '' && isTimeSelected &&(
 
                                         <TouchableOpacity style={styles.buttonModal} onPress={addSchedule}>
                                             <Text style={{ color: 'white', fontWeight: 'bold' }}>
@@ -437,27 +480,28 @@ export default function Schedule() {
 
             </Modal>
             <Calendar
-                style={styles.calendarDes}
-                current={new Date(new Date().getTime() + (8 * 60 * 60 * 1000)).toISOString().split('T')[0]}
-                onDayPress={day => {
-                    setSelectedDate(day.dateString);
-                    console.log('selected day', day);
-                }}
-                markedDates={{
-                    ...userDates,
-                    [selectedDate]: { selected: true, selectedColor: '#BA5255' },
-                    ...userDatesArray.reduce((acc, date) => {
-                        acc[date] = { marked: true, dotColor: 'white', selected: true, selectedColor: '#d49698' };
-                        return acc;
-                    }, {}),
-                    ...Object.keys(userDates).reduce((acc, date) => {
-                        if (userDates[date].items.some(item => item.state === 'approved' && currentUser?.username === item.username)) {
-                            acc[date] = { selected: true, selectedColor: '#BA5255', dotColor: 'white', marked: true };
-                        }
-                        return acc;
-                    }, {})
-                }}
-            />
+    style={styles.calendarDes}
+    current={new Date(new Date().getTime() + (8 * 60 * 60 * 1000)).toISOString().split('T')[0]}
+    onDayPress={day => {
+        setSelectedDate(day.dateString);
+        console.log('selected day', day);
+    }}
+    markedDates={{
+        ...userDates,
+        [selectedDate]: { selected: true, selectedColor: '#BA5255' },
+        ...userDatesArray.reduce((acc, date) => {
+            acc[date] = { marked: true, dotColor: 'white', selected: true, selectedColor: '#eacccd' };
+            return acc;
+        }, {}),
+        ...Object.keys(userDates).reduce((acc, date) => {
+            if (userDates[date].items.some(item => item.state === 'approved' && currentUser?.username === item.username)) {
+                acc[date] = { selected: true, selectedColor: '#BA5255', dotColor: 'white', marked: true };
+            }
+            return acc;
+        }, {}),
+        ...getDisabledWeekends(), // Add disabled Saturdays and Sundays dynamically
+    }}
+/>
             {renderSchedules()}
 
                 {currentUser?.username === 'll' &&(
@@ -481,6 +525,8 @@ export default function Schedule() {
         </View>
     );
 }
+
+export default Schedule;
 
 const styles = StyleSheet.create({
     container: {

@@ -22,6 +22,11 @@ export default function Community() {
   const [loading, setLoading] = useState(true);
   const [threads, setThreads] = useState();
   const [questions, setQuestions] = useState();
+  const [dropddown, setdropddown] = useState(false);
+
+  const toggleDropdown = () => {
+    setdropddown(!dropddown);
+  }
 
 const streamPosts = (observer) => {
     db.collection('threads').onSnapshot(observer)
@@ -143,22 +148,47 @@ const streamPostsQuestions = (observer) => {
 
         </View>
 
-        <View style={{justifyContent: 'center', alignItems: 'center', borderBottomWidth: 1, paddingVertical: 15, borderColor: '#BA5255'}}>
-          <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>Featured Question</Text>
-        </View>
+        <View>
 
-        <View style={styles.content}>
+          <View style={{justifyContent: 'center', alignItems: 'center', borderBottomWidth: 1, paddingVertical: 15, borderColor: '#BA5255'}}>
+            <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>Featured Question</Text>
+          </View>
+
+          <View style={styles.content}>
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#8a344c" />
             </View>
           ) : (
             <>
-              {questions?.map(question => <CounselorPostDesign2 key={question.id} item={{ ...question, createdAt: question.formattedDate }} />)}
+              {!dropddown ? (
+                questions?.slice(0, 1).map(question => (
+                  <CounselorPostDesign2 key={question.id} item={{ ...question, createdAt: question.formattedDate }} />
+                ))
+              ) : (
+                questions?.map(question => (
+                  <CounselorPostDesign2 key={question.id} item={{ ...question, createdAt: question.formattedDate }} />
+                ))
+              )}
             </>
-
           )}
-        </View >
+
+          </View >
+
+          <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 10}}>
+            <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row', backgroundColor: '#BA5255', padding: 10, borderRadius: 10, paddingHorizontal: 15}} onPress={toggleDropdown}>
+
+              <Text style={{marginRight: 10, fontWeight: 'bold', color: 'white', fontSize: 10}}>
+                {dropddown ? "Hide" : "See More"}
+              </Text>
+              <FontAwesome name={dropddown ? "eye-slash" : "eye"} size={14} color="white" />
+              
+            </TouchableOpacity>
+
+          </View>
+
+
+        </View>
 
         <View style={{justifyContent: 'center', alignItems: 'center', borderBottomWidth: 1, paddingVertical: 15, borderColor: '#BA5255'}}>
                         <Text style={{fontSize: 25, fontWeight: 'bold', color: '#BA5255'}}>Messages</Text>

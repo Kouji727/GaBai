@@ -42,12 +42,12 @@ export default function CounselorCont({ item }) {
           {item.info3}
         </Text>
       </View>
-      <TouchableOpacity style={styles.socialLinkButton} onPress={openLink}>
+      {/* <TouchableOpacity style={styles.socialLinkButton} onPress={openLink}>
         <View style={styles.buttonContent}>
           <Text style={styles.buttonText}>Social Link</Text>
           <FontAwesome name="heart" size={24} color="white" />
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   )
 }
