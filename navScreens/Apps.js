@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, ImageBackground, Image, TouchableOpacity, TextInput } from 'react-native';
 import { auth, db } from '../firebase';
 import firebase from 'firebase/compat/app';
@@ -6,18 +6,30 @@ import 'firebase/compat/firestore';
 
 export default function Apps() {
     const [isTimerVisible, setIsTimerVisible] = useState(false);
-    const [minutes, setMinutes] = useState('');
     const [remainingTime, setRemainingTime] = useState(0);
     const [isCountingDown, setIsCountingDown] = useState(false);
     const [intervalId, setIntervalId] = useState(null);
     const [plantPositions, setPlantPositions] = useState([]);
     const [user, setUser] = useState(null);
+    const selectedPlantRef = useRef(null); // useRef to store the selected plant type
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
                 setUser(user);
                 fetchPlantData(user.uid);
+
+                // Listen for real-time updates to plant data
+                const unsubscribe = db.collection('gameDB').doc(user.uid)
+                    .onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            setPlantPositions(data.plantPositions || []);
+                        }
+                    });
+                
+                // Clean up the listener when the component unmounts
+                return () => unsubscribe();
             } else {
                 console.log("No user is signed in.");
             }
@@ -37,12 +49,11 @@ export default function Apps() {
         }
     };
 
-    const startTimer = () => {
-        const seconds = parseInt(minutes) * 60;
-        setRemainingTime(seconds);
-        setIsTimerVisible(false); 
+    const startTimer = (time) => {
+        setRemainingTime(time);
+        setIsTimerVisible(false);
         setIsCountingDown(true);
-        if (seconds > 0) {
+        if (time > 0) {
             const id = setInterval(() => {
                 setRemainingTime(prevTime => {
                     if (prevTime <= 1) {
@@ -58,13 +69,21 @@ export default function Apps() {
         }
     };
 
+    const handleTimerButtonPress = (time, plantType) => {
+        selectedPlantRef.current = plantType;
+        startTimer(time);
+    };
+
     const updatePlantData = () => {
-        const newPosition = generateRandomPosition();
-        setPlantPositions(prevPositions => {
-            const updatedPositions = [...prevPositions, newPosition];
-            savePlantData(user.uid, updatedPositions);
-            return updatedPositions;
-        });
+        const selectedPlant = selectedPlantRef.current; // Get the selected plant type from useRef
+        if (selectedPlant) {
+            const newPosition = generateRandomPosition();
+            setPlantPositions(prevPositions => {
+                const updatedPositions = [...prevPositions, { ...newPosition, type: selectedPlant }];
+                savePlantData(user.uid, updatedPositions);
+                return updatedPositions;
+            });
+        }
     };
 
     const savePlantData = async (uid, plantPositions) => {
@@ -88,25 +107,22 @@ export default function Apps() {
         setIsTimerVisible(false);
     };
 
-    const formatTime = (seconds) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    };
-
     const generateRandomPosition = () => {
-        const maxWidth = 700; // Assuming the View width is 100% of the parent width
-        const maxHeight = 330; // Assuming the View height is 330
-        const minDistance = 10; // Minimum distance between plants
-        
+        const maxWidth = 330; // Maximum x value
+        const maxHeight = 250; // Maximum y value
+        const minDistance = 50; // Minimum distance between plants
+        const maxAttempts = 100; // Maximum attempts to find a non-overlapping position
+    
         let newPosition = null;
         let isOverlapping = false;
+        let attempts = 0;
+    
         do {
             newPosition = {
-                x: Math.floor(Math.random() * (maxWidth - 75)), // 75 is the width of the plant icon
-                y: Math.floor(Math.random() * (maxHeight - 75)), // 75 is the height of the plant icon
+                x: Math.floor(Math.random() * maxWidth),
+                y: Math.floor(Math.random() * maxHeight),
             };
-            
+    
             // Check if the new position overlaps with existing plant positions
             isOverlapping = plantPositions.some(position => {
                 const distanceX = Math.abs(position.x - newPosition.x);
@@ -114,10 +130,24 @@ export default function Apps() {
                 const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
                 return distance < minDistance;
             });
+    
+            // Ensure the new position is within the specified boundaries
+            if (newPosition.x < 0 || newPosition.x > maxWidth || newPosition.y < 0 || newPosition.y > maxHeight) {
+                isOverlapping = true;
+            }
+    
+            attempts++;
+    
+            // Break the loop if maximum attempts reached
+            if (attempts >= maxAttempts) {
+                break;
+            }
         } while (isOverlapping);
-        
+    
         return newPosition;
     };
+    
+    
 
     useEffect(() => {
         return () => {
@@ -134,7 +164,7 @@ export default function Apps() {
                 {plantPositions.map((position, index) => (
                     <Image 
                         key={index}
-                        source={require('../assets/plantIcon.png')}
+                        source={position.type === 'sprout' ? require('../assets/plantIcon.png') : require('../assets/flower.png')}
                         style={{
                             width: 75,
                             height: 75,
@@ -145,6 +175,7 @@ export default function Apps() {
                         }}
                     />
                 ))}
+
             </View>
 
             <TouchableOpacity 
@@ -157,22 +188,91 @@ export default function Apps() {
 
             {isTimerVisible && (
                 <View style={styles.timerContainer}>
-                    <TextInput 
-                        style={styles.input}
-                        keyboardType='numeric'
-                        placeholder='Enter minutes'
-                        value={minutes}
-                        onChangeText={setMinutes}
-                    />
-                    <TouchableOpacity style={styles.startButton} onPress={startTimer}>
-                        <Text style={styles.startButtonText}>Start Timer</Text>
-                    </TouchableOpacity>
+
+
+
+            <TouchableOpacity 
+                style={{flexDirection: 'row', marginBottom: 15}} 
+                onPress={() => {
+                    startTimer(1); 
+                    selectedPlantRef.current = 'sprout'; // Set the selected plant type
+                }}
+            >
+                <View style={{alignItems: 'center', justifyContent: 'center', backgroundColor: '#ccffcc', borderRadius: 10, padding: 5}}>
+
+                    <View style={{justifyContent: 'center', alignItems: 'center', width: "50%", aspectRatio: 1, overflow: 'hidden', backgroundColor: '#99ff99', padding: 10, borderRadius: 100}}>
+                        <Image source={require('../assets/plantIcon.png')} style={{resizeMode: 'contain', width: "100%", height: '100%'}}/>
+
+                    </View>
+
+                    <Text style={{fontSize: 15, fontWeight: "bold", color: "#BA5255"}}>Sprout | 1 second</Text>
+
+                    
+                </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+                style={{flexDirection: 'row', marginBottom: 15}} 
+                onPress={() => {
+                    startTimer(1); 
+                    selectedPlantRef.current = 'flower'; // Set the selected plant type
+                }}
+            >
+
+                <View style={{alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffe6e6', borderRadius: 10, padding: 5}}>
+
+                    <View style={{justifyContent: 'center', alignItems: 'center', width: "50%", aspectRatio: 1, overflow: 'hidden', backgroundColor: 'pink', padding: 10, borderRadius: 100}}>
+                        <Image source={require('../assets/flower.png')} style={{resizeMode: 'contain', width: "100%", height: '100%'}}/>
+
+                    </View>
+                    <Text style={{fontSize: 15, fontWeight: "bold", color: "#BA5255"}}>Flower | 1 second</Text>
+
+                </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+                style={{flexDirection: 'row', marginBottom: 15}} 
+                onPress={() => {
+                    startTimer(15 * 60); 
+                    selectedPlantRef.current = 'sprout'; // Set the selected plant type
+                }}
+            >
+                <View style={{alignItems: 'center', justifyContent: 'center',backgroundColor: '#ccffcc', borderRadius: 10, padding: 5}}>
+                    <View style={{justifyContent: 'center', alignItems: 'center', width: "50%", aspectRatio: 1, overflow: 'hidden', backgroundColor: '#99ff99', padding: 10, borderRadius: 100}}>
+                        <Image source={require('../assets/plantIcon.png')} style={{resizeMode: 'contain', width: "100%", height: '100%'}}/>
+
+                    </View>
+                    <Text style={{fontSize: 15, fontWeight: "bold", color: "#BA5255"}}>Sprout | 15 minutes</Text>
+
+                </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+                style={{flexDirection: 'row', marginBottom: 15}} 
+                onPress={() => {
+                    startTimer(30 * 60); 
+                    selectedPlantRef.current = 'flower'; // Set the selected plant type
+                }}
+            >
+
+                <View style={{alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffe6e6', borderRadius: 10, padding: 5}}>
+
+                    <View style={{justifyContent: 'center', alignItems: 'center', width: "50%", aspectRatio: 1, overflow: 'hidden', backgroundColor: 'pink', padding: 10, borderRadius: 100}}>
+                        <Image source={require('../assets/flower.png')} style={{resizeMode: 'contain', width: "100%", height: '100%'}}/>
+
+                    </View>
+
+                    <Text style={{fontSize: 15, fontWeight: "bold", color: "#BA5255"}}>Flower | 30 minutes</Text>
+                                    
+                </View>
+            </TouchableOpacity>
+
                 </View>
             )}
 
             {remainingTime > 0 && (
                 <View style={styles.countdownContainer}>
-                    <Text style={styles.countdownText}>{formatTime(remainingTime)}</Text>
+                    <Text style={styles.countdownText}>{remainingTime}</Text>
                     <TouchableOpacity style={styles.cancelButton} onPress={cancelTimer}>
                         <Text style={styles.cancelButtonText}>Cancel</Text>
                     </TouchableOpacity>
@@ -207,7 +307,7 @@ const styles = StyleSheet.create({
     },
     timerContainer: {
         position: 'absolute',
-        top: '40%',
+        top: '10%',
         left: '10%',
         right: '10%',
         backgroundColor: 'white',

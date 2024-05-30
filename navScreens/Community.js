@@ -230,6 +230,10 @@ const streamPostsQuestions = (observer) => {
           </View>
         </Modal>
 
+        <View style={{paddingBottom: 50}}>
+
+        </View>
+
       </ScrollView>
 
         <TouchableOpacity style={styles.floatingButtonContainer} onPress={toggleModal}>
