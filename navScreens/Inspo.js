@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 import quotes from './quotes';
 import { db, streamCounselor } from '../firebase';
+import { FontAwesome } from '@expo/vector-icons';
 
 export default function Inspo() {
   const [quote, setQuote] = useState('');
@@ -78,42 +79,60 @@ export default function Inspo() {
     }, []);
 
   return (
-<ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#e8dada' }}>
-    <View style={styles.container}>
-            <View style={styles.quoteContainer}>
-                <Text style={styles.qotdText}>Quote of the Day</Text>
-                    <View style={styles.quoteAndBut}>
-                            <View style={styles.placeholder}>
-                                <Text style={{ textAlign: 'center' }}>{quote}</Text>
+<ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#f5eded' }}>
+
+      <View  style={{paddingBottom: 10}}>
+
+        <View style={{justifyContent: 'center', alignItems: 'center', marginTop: 15}}>
+            
+                <View style={{justifyContent: 'center', alignItems: 'center', width: '90%'}}>
+                    <View style={{justifyContent: 'center', alignItems: 'center', backgroundColor: '#BA5255', width: "100%", padding: 25, borderTopStartRadius: 7, borderTopEndRadius: 7}}>
+                        <Text style={{fontWeight: 'bold', fontSize: 20, color: 'white'}}>Quote of the Day</Text>
+                    </View>
+                </View>
+
+                <View style={{backgroundColor: 'white', width: "90%", justifyContent: 'center', alignItems: 'center', padding: 50, borderBottomEndRadius: 7, borderBottomStartRadius: 7}}>
+
+                    <Text style={{fontWeight: 'bold', fontSize: 20, color: '#BA5255', marginBottom: 10, textAlign: 'center'}}>
+                      {quote}
+                    </Text>
+
+                </View>
+          </View>
+      </View>
+
+      <View  style={{paddingBottom: 50}}>
+
+<View style={{justifyContent: 'center', alignItems: 'center', marginTop: 15, paddingBottom: 25}}>
+    
+        <View style={{justifyContent: 'center', alignItems: 'center', width: '90%'}}>
+            <View style={{justifyContent: 'center', alignItems: 'center', backgroundColor: '#BA5255', width: "100%", padding: 25, borderTopStartRadius: 7, borderTopEndRadius: 7}}>
+                <Text style={{fontWeight: 'bold', fontSize: 20, color: 'white'}}>Recent Events</Text>
+            </View>
+        </View>
+
+        <View style={{backgroundColor: 'white', width: "90%", justifyContent: 'center', alignItems: 'center', borderBottomEndRadius: 7, borderBottomStartRadius: 7, paddingBottom: 15}}>
+
+        <Text style={{fontSize: 13, textAlign: 'center', marginHorizontal: 40, fontSize: 15, marginVertical: 10, color: '#BA5255'}}>
+                                {content?.inspo3}
+                            </Text>
+
+                            <View style={{width: "100%", justifyContent: 'center', alignItems: 'center'}}>
+                              <View style={styles.reCont}>
+                                          <Image
+                                          source={{ uri: images[currentImageIndex] }}
+                                          style={styles.image}
+                                          resizeMode="cover"
+                                          />
+                              </View>
+
                             </View>
-                    </View>
-            </View>
-
-                <View style={styles.weCont}>
 
 
-
-                <View style={styles.reCont}>
-                    <Text style={styles.insideText}>Recent Events</Text>
-                    <View style={{width: '90%', alignItems: 'center', justifyContent: 'center'}}>
-                        <Text style={{fontSize: 13, textAlign: 'center'}}>
-                            {content?.inspo3}
-                        </Text>
-
-                    </View>
-                        <View style={styles.imageContainer}></View>
-                                    <Image
-                                    source={{ uri: images[currentImageIndex] }}
-                                    style={styles.image}
-                                    resizeMode="cover"
-                                    />
-                        </View>
-
-                    </View>
-
-
-            </View>
+        </View>
         
+  </View>
+</View>
 
 </ScrollView>
 
@@ -172,11 +191,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   reCont: {
-    width: '85%',
+    width: '100%',
     backgroundColor: 'white',
     alignItems: 'center',
     borderRadius: 15,
-    height: 450
   },
   insideText: {
     fontSize: 25,
