@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TouchableHighlight, TextInput } from 'react-native';
 import { Octicons } from '@expo/vector-icons';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
@@ -9,7 +9,6 @@ import ThreadDesignComment from './threadDesignComment';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { TextInput } from 'react-native-gesture-handler';
 import { addDoc, collection } from 'firebase/firestore';
 
 

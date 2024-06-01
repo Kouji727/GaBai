@@ -470,7 +470,6 @@ const ThreadCommentPage = ({ route }) => {
                             )}
 
                             {/* DELETE AFTER */}
-                            <Text>{updatedItem.id}</Text>
                             <View style={styles.lowerButtonCont}>
                                 <TouchableOpacity style={styles.icontainer} onPress={handleLike}>
                                     <FontAwesome6 name="heart" size={24} color={isLiked ? 'red' : 'grey'} solid={isLiked} />
